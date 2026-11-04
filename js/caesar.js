@@ -461,6 +461,7 @@ CipherApp.registerModule('caesar', function(container) {
 
         // Outer ring background
         var outerCircle = document.createElementNS(svgNS, 'circle');
+        outerCircle.setAttribute('id', 'wheel-outer-circle');
         outerCircle.setAttribute('cx', CX);
         outerCircle.setAttribute('cy', CY);
         outerCircle.setAttribute('r', OUTER_R);
@@ -471,6 +472,7 @@ CipherApp.registerModule('caesar', function(container) {
 
         // Inner ring background
         var innerCircle = document.createElementNS(svgNS, 'circle');
+        innerCircle.setAttribute('id', 'wheel-inner-circle');
         innerCircle.setAttribute('cx', CX);
         innerCircle.setAttribute('cy', CY);
         innerCircle.setAttribute('r', INNER_R);
@@ -482,6 +484,7 @@ CipherApp.registerModule('caesar', function(container) {
 
         // Center circle
         var centerCircle = document.createElementNS(svgNS, 'circle');
+        centerCircle.setAttribute('id', 'wheel-center-circle');
         centerCircle.setAttribute('cx', CX);
         centerCircle.setAttribute('cy', CY);
         centerCircle.setAttribute('r', INNER_BG_R);
@@ -606,19 +609,35 @@ CipherApp.registerModule('caesar', function(container) {
         wheelMappingDisplay.style.display = 'none';
         // Reset colors
         var outerTexts = wheelSvg.querySelectorAll('text[data-outer-index]');
-        outerTexts.forEach(function(t) { t.setAttribute('fill', '#2563eb'); t.setAttribute('font-size', '13'); });
+        outerTexts.forEach(function(t) {
+            t.classList.remove('wheel-highlight-active');
+            t.setAttribute('fill', '#2563eb');
+            t.setAttribute('font-size', '13');
+        });
         var innerTexts = wheelSvg.querySelectorAll('text[data-inner-index]');
-        innerTexts.forEach(function(t) { t.setAttribute('fill', '#dc2626'); t.setAttribute('font-size', '12'); });
+        innerTexts.forEach(function(t) {
+            t.classList.remove('wheel-highlight-active');
+            t.setAttribute('fill', '#dc2626');
+            t.setAttribute('font-size', '12');
+        });
     }
 
     function highlightWheelPair(outerIdx, innerIdx, fromOuter) {
         clearWheelHighlights();
         // Highlight outer
         var outerText = wheelSvg.querySelector('text[data-outer-index="' + outerIdx + '"]');
-        if (outerText) { outerText.setAttribute('fill', '#1d4ed8'); outerText.setAttribute('font-size', '16'); }
+        if (outerText) {
+            outerText.classList.add('wheel-highlight-active');
+            outerText.setAttribute('fill', '#1d4ed8');
+            outerText.setAttribute('font-size', '16');
+        }
         // Highlight inner (need to find the letter that appears at position outerIdx after rotation)
         var innerText = wheelSvg.querySelector('text[data-inner-index="' + innerIdx + '"]');
-        if (innerText) { innerText.setAttribute('fill', '#b91c1c'); innerText.setAttribute('font-size', '15'); }
+        if (innerText) {
+            innerText.classList.add('wheel-highlight-active');
+            innerText.setAttribute('fill', '#b91c1c');
+            innerText.setAttribute('font-size', '15');
+        }
 
         var plainLetter = numToLetter(outerIdx);
         var cipherLetter = numToLetter(innerIdx);

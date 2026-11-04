@@ -18,7 +18,7 @@
 
             <!-- Visual Comparison Table Card -->
             <div class="card">
-                <div class="card-header" style="background: var(--gray-800);">
+                <div class="card-header" style="background: var(--bg-surface-elevated);">
                     <h3>⚔️ Side-by-Side Cipher Comparison</h3>
                 </div>
                 <div class="card-body">
@@ -163,7 +163,7 @@
 
             <!-- Deep Dive Collapsible Cards -->
             <div class="card">
-                <div class="card-header" style="background: var(--gray-700);">
+                <div class="card-header" style="background: var(--bg-surface-elevated);">
                     <h3>🔍 In-Depth Conceptual Comparisons</h3>
                 </div>
                 <div class="card-body">
@@ -452,7 +452,7 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header" style="background: var(--gray-800);">
+                    <div class="card-header" style="background: var(--bg-surface-elevated);">
                         <h3>⚙️ Exam Setup &amp; Configuration</h3>
                     </div>
                     <div class="card-body">
@@ -621,7 +621,7 @@
             var html = `
             <div class="section-content">
                 <!-- Exam Top Bar -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: #fff; padding: 0.75rem 1.25rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-medium); padding: 0.75rem 1.25rem; border-radius: var(--radius); box-shadow: var(--shadow);">
                     <div>
                         <span class="badge" style="background: var(--${q.cipher === 'monoalphabetic' ? 'mono' : q.cipher}-color);">${q.cipher.toUpperCase()}</span>
                         <span class="badge badge-${q.difficulty === 'easy' ? 'success' : q.difficulty === 'medium' ? 'warning' : 'danger'}" style="margin-left: 0.5rem;">${q.difficulty.toUpperCase()}</span>
@@ -868,7 +868,7 @@
 
                 <!-- Detailed Question Review List -->
                 <div class="card" style="margin-top: 1.5rem;">
-                    <div class="card-header" style="background: var(--gray-800);">
+                    <div class="card-header" style="background: var(--bg-surface-elevated);">
                         <h3>📋 Detailed Question Review &amp; Solutions</h3>
                     </div>
                     <div class="card-body">
@@ -1083,7 +1083,7 @@
 
             <!-- "Can You Solve This?" Challenge Section -->
             <div class="card">
-                <div class="card-header" style="background: var(--gray-900);">
+                <div class="card-header" style="background: var(--bg-surface-elevated);">
                     <h3>🎯 "Can You Solve This?" Cryptanalysis Mystery Challenges</h3>
                 </div>
                 <div class="card-body">

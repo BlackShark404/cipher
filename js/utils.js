@@ -111,6 +111,53 @@ var CipherApp = window.CipherApp;
             return div.innerHTML;
         },
 
+        // Show Toast Notification
+        showToast: function(message, type) {
+            var container = document.getElementById('toast-container');
+            if (!container) return;
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-' + (type || 'info');
+            var icon = type === 'success' ? '✓' : (type === 'danger' ? '⚠' : 'ℹ');
+            toast.innerHTML = '<span style="font-size:1.1rem;font-weight:700;">' + icon + '</span> <span>' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(15px) scale(0.95)';
+                setTimeout(function() {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 300);
+            }, 3000);
+        },
+
+        // Copy text to clipboard
+        copyToClipboard: function(text) {
+            if (!text) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    app.utils.showToast('Copied to clipboard!', 'success');
+                }).catch(function() {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+            function fallbackCopy(str) {
+                var ta = document.createElement('textarea');
+                ta.value = str;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    app.utils.showToast('Copied to clipboard!', 'success');
+                } catch(e) {
+                    app.utils.showToast('Unable to copy', 'danger');
+                }
+                document.body.removeChild(ta);
+            }
+        },
+
         // Create an element with attributes and children
         createElement: function(tag, attrs, children) {
             var el = document.createElement(tag);

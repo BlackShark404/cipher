@@ -897,7 +897,7 @@ CipherApp.registerModule('monoalphabetic', function(container) {
         // Highlight conflicting inputs
         container.querySelectorAll('.mono-freq-map-input').forEach(function(inp) {
             inp.style.borderColor = 'var(--plain-color)';
-            inp.style.background = '#fff';
+            inp.style.background = 'var(--bg-input)';
         });
 
         if (conflicts.length > 0) {
@@ -908,7 +908,7 @@ CipherApp.registerModule('monoalphabetic', function(container) {
                         var inp = container.querySelector('.mono-freq-map-input[data-cipher="' + c + '"]');
                         if (inp) {
                             inp.style.borderColor = 'var(--danger)';
-                            inp.style.background = '#fef2f2';
+                            inp.style.background = 'rgba(244, 63, 94, 0.2)';
                         }
                     });
                 }
@@ -1002,7 +1002,7 @@ CipherApp.registerModule('monoalphabetic', function(container) {
         container.querySelectorAll('.mono-freq-map-input').forEach(function(inp) {
             inp.value = '';
             inp.style.borderColor = 'var(--plain-color)';
-            inp.style.background = '#fff';
+            inp.style.background = 'var(--bg-input)';
         });
         container.querySelector('#mono-freq-mapping-status').style.display = 'none';
         updatePartialDecrypt();

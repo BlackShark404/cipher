@@ -2,8 +2,20 @@
 (function(app) {
     'use strict';
 
+    var utils = app.utils;
+
     // ---- Navigation ----
     var currentSection = 'home';
+
+    var sectionTitles = {
+        home: 'Interactive Learning Suite',
+        caesar: 'Caesar Cipher (Shift) Lab',
+        monoalphabetic: 'Monoalphabetic Substitution Lab',
+        playfair: 'Playfair 5×5 Matrix Lab',
+        comparison: 'Comparative Cryptanalysis Guide',
+        exam: 'Timed Practical Exam Simulation',
+        review: 'Cheat Sheets, Cribs & Fast Reference'
+    };
 
     function navigateTo(sectionId) {
         // Update nav items
@@ -18,11 +30,50 @@
 
         currentSection = sectionId;
 
+        // Update topbar breadcrumbs
+        var breadcrumb = document.getElementById('top-breadcrumb');
+        if (breadcrumb && sectionTitles[sectionId]) {
+            breadcrumb.textContent = sectionTitles[sectionId];
+        }
+
         // Close mobile sidebar
-        document.getElementById('sidebar').classList.remove('open');
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.remove('open');
 
         // Scroll to top
         window.scrollTo(0, 0);
+    }
+
+    // ---- Theme Controller ----
+    function initTheme() {
+        var savedTheme = localStorage.getItem('cryptolab_theme') || 'dark';
+        applyTheme(savedTheme);
+
+        var toggleBtn = document.getElementById('sidebar-theme-toggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                var current = document.documentElement.getAttribute('data-theme') || 'dark';
+                var next = current === 'dark' ? 'light' : 'dark';
+                applyTheme(next);
+            });
+        }
+    }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem('cryptolab_theme', theme); } catch(e) {}
+
+        var icon = document.getElementById('theme-btn-icon');
+        var text = document.getElementById('theme-btn-text');
+        if (icon && text) {
+            if (theme === 'dark') {
+                icon.textContent = '☀️';
+                text.textContent = 'Light Mode';
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            }
+        }
     }
 
     // ---- Progress Update ----
@@ -49,12 +100,92 @@
         var overall = Math.round(total / count);
         var fill = document.getElementById('overall-progress-fill');
         var text = document.getElementById('overall-progress-text');
+        var rank = document.getElementById('rank-title');
+        
         if (fill) fill.style.width = overall + '%';
         if (text) text.textContent = overall + '%';
+
+        if (rank) {
+            if (overall === 0) rank.textContent = 'Recruit';
+            else if (overall < 35) rank.textContent = 'Apprentice';
+            else if (overall < 70) rank.textContent = 'Cryptanalyst';
+            else if (overall < 100) rank.textContent = 'Senior Specialist';
+            else rank.textContent = 'Master Cryptographer 🏆';
+        }
     };
+
+    // ---- Live Home Sandbox ----
+    function initSandbox() {
+        var input = document.getElementById('sandbox-input');
+        var caesarOut = document.getElementById('sandbox-caesar-out');
+        var monoOut = document.getElementById('sandbox-mono-out');
+        var playfairOut = document.getElementById('sandbox-playfair-out');
+
+        if (!input || !caesarOut || !monoOut || !playfairOut) return;
+
+        var sampleMonoKey = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+        var sampleAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        function updateSandbox() {
+            var val = input.value || '';
+            var clean = val.toUpperCase().replace(/[^A-Z]/g, '');
+
+            // 1. Caesar (+3)
+            var cRes = '';
+            for (var i = 0; i < val.length; i++) {
+                var ch = val[i].toUpperCase();
+                if (/[A-Z]/.test(ch)) {
+                    var code = (ch.charCodeAt(0) - 65 + 3) % 26;
+                    cRes += String.fromCharCode(code + 65);
+                } else {
+                    cRes += val[i];
+                }
+            }
+            caesarOut.textContent = cRes || '---';
+
+            // 2. Monoalphabetic
+            var mRes = '';
+            for (var j = 0; j < val.length; j++) {
+                var mch = val[j].toUpperCase();
+                var idx = sampleAlphabet.indexOf(mch);
+                if (idx !== -1) {
+                    mRes += sampleMonoKey[idx];
+                } else {
+                    mRes += val[j];
+                }
+            }
+            monoOut.textContent = mRes || '---';
+
+            // 3. Playfair Digraphs Preview
+            var cleanPF = val.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            var pairs = [];
+            var p = 0;
+            while (p < cleanPF.length) {
+                var first = cleanPF[p];
+                var second = cleanPF[p + 1];
+                if (!second) {
+                    pairs.push(first + 'X');
+                    p += 1;
+                } else if (first === second) {
+                    pairs.push(first + 'X');
+                    p += 1;
+                } else {
+                    pairs.push(first + second);
+                    p += 2;
+                }
+            }
+            playfairOut.textContent = pairs.length > 0 ? pairs.join(' · ') : '---';
+        }
+
+        input.addEventListener('input', updateSandbox);
+        updateSandbox();
+    }
 
     // ---- Init ----
     document.addEventListener('DOMContentLoaded', function() {
+        // Init theme
+        initTheme();
+
         // Nav clicks
         document.querySelectorAll('.nav-item').forEach(function(item) {
             item.addEventListener('click', function() {
@@ -62,13 +193,27 @@
             });
         });
 
-        // Home card clicks
-        document.querySelectorAll('.home-card').forEach(function(card) {
-            card.addEventListener('click', function() {
-                var target = this.dataset.goto;
+        // Any element with data-goto (hero buttons, breadcrumbs, home cards)
+        document.addEventListener('click', function(e) {
+            var targetEl = e.target.closest('[data-goto]');
+            if (targetEl) {
+                var target = targetEl.dataset.goto;
                 if (target) navigateTo(target);
-            });
+            }
         });
+
+        // Reset progress button
+        var resetBtn = document.getElementById('sidebar-reset-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                if (confirm('Reset all cryptography progress across all modules?')) {
+                    app.progress.reset();
+                    if (app.utils && app.utils.showToast) {
+                        app.utils.showToast('Progress has been reset.', 'info');
+                    }
+                }
+            });
+        }
 
         // Mobile menu toggle
         var toggleBtn = document.getElementById('menu-toggle');
@@ -106,6 +251,17 @@
             }
         });
 
+        // Copy functionality on double-click or click of result boxes
+        document.addEventListener('click', function(e) {
+            var resBox = e.target.closest('.result-box');
+            if (resBox && e.altKey) {
+                app.utils.copyToClipboard(resBox.innerText);
+            }
+        });
+
+        // Init Sandbox
+        initSandbox();
+
         // Update progress display
         app.updateProgress();
     });
@@ -114,4 +270,3 @@
     app.navigateTo = navigateTo;
 
 })(window.CipherApp);
-
