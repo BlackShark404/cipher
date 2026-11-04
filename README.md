@@ -83,3 +83,4 @@ python3 -m http.server 8000
 - **CSS3**: Custom design system, CSS Grid/Flexbox, KaTeX-style math layouts, and transitions.
 - **JavaScript (ES6+)**: Modular client-side architecture with `localStorage` persistent state tracking.
 - **GitHub Actions**: Automated CI/CD pipeline deploying directly to GitHub Pages.
+
