@@ -503,7 +503,7 @@ CipherApp.registerModule('monoalphabetic', function(container) {
             var cell = container.querySelector('#mono-c-' + i);
             if (cell) {
                 cell.textContent = cipherAlpha[i];
-                cell.classList.remove('error', 'matched');
+                cell.classList.remove('error');
             }
         }
         validateAlphabet();
@@ -540,11 +540,9 @@ CipherApp.registerModule('monoalphabetic', function(container) {
         for (var i = 0; i < 26; i++) {
             var cell = container.querySelector('#mono-c-' + i);
             if (cell) {
-                cell.classList.remove('error', 'matched');
+                cell.classList.remove('error');
                 if (duplicates[i]) {
                     cell.classList.add('error');
-                } else if (!hasDuplicates) {
-                    cell.classList.add('matched');
                 }
             }
         }
