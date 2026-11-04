@@ -1360,17 +1360,29 @@ hr {
     stroke: #334155 !important;
 }
 
+#caesar-wheel-svg text[data-outer-index] {
+    fill: #0284c7;
+}
+#caesar-wheel-svg text[data-inner-index] {
+    fill: #e11d48;
+}
+#caesar-wheel-svg text.wheel-highlight-active {
+    fill: #0f172a !important;
+    font-weight: 800 !important;
+}
+
 [data-theme="dark"] #caesar-wheel-svg text {
     fill: #94a3b8;
 }
 [data-theme="dark"] #caesar-wheel-svg text[data-outer-index] {
-    fill: #38bdf8;
+    fill: #38bdf8 !important;
 }
 [data-theme="dark"] #caesar-wheel-svg text[data-inner-index] {
-    fill: #fb7185;
+    fill: #fb7185 !important;
 }
 [data-theme="dark"] #caesar-wheel-svg text.wheel-highlight-active {
     fill: #ffffff !important;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85)) !important;
     font-weight: 800 !important;
 }
 [data-theme="dark"] #caesar-wheel-svg #wheel-center-key {

@@ -233,28 +233,31 @@
             var shortWords = ['KEY', 'LAB', 'FOX', 'NET', 'MAP', 'SUN', 'CIPHER', 'GUARD', 'SHIELD', 'MATRIX'];
             var mediumWords = ['CRYPTOGRAPHY', 'SECRETKEY', 'DEFENDER', 'TRANSMIT', 'SECURITY', 'ALGORITHM'];
 
-            // 1. Caesar Questions Generator
+            // =================================================================
+            // 1. Caesar Cipher Question Bank (15 Questions: 10 Easy, 2 Med, 3 Hard)
+            // =================================================================
             if (ciphers.indexOf('caesar') !== -1) {
-                // Easy: basic encrypt/decrypt
-                for (var i = 0; i < 5; i++) {
-                    var word = shortWords[i % shortWords.length];
-                    var k = (i * 3 + 2) % 25 + 1;
-                    var encWord = '';
-                    for (var w = 0; w < word.length; w++) {
-                        encWord += utils.numToLetter(utils.letterToNum(word[w]) + k);
-                    }
+                // Easy: Manual encryption drills with varied shifts (5 items)
+                var caesarEncDrills = [
+                    { word: 'LAB', k: 4, enc: 'PEF' },
+                    { word: 'SUN', k: 5, enc: 'XZS' },
+                    { word: 'CIPHER', k: 7, enc: 'JPWOLY' },
+                    { word: 'GUARD', k: 11, enc: 'RFLCO' },
+                    { word: 'SHIELD', k: 3, enc: 'VKLHOG' }
+                ];
 
+                caesarEncDrills.forEach(function(d) {
                     pool.push({
                         cipher: 'caesar',
                         difficulty: 'easy',
                         type: 'text',
                         title: 'Caesar Cipher: Manual Encryption',
-                        question: `Encrypt the word <strong>"${word}"</strong> using a Caesar shift key of <span class="highlight-key">k = ${k}</span>.<br><small class="text-muted">Use formula $C = (P + ${k}) \\pmod{26}$. Enter ciphertext in uppercase.</small>`,
-                        correctAnswer: encWord,
-                        hint: `Shift each letter forward by ${k}. For example, ${word[0]} (${utils.letterToNum(word[0])}) + ${k} = ${utils.letterToNum(word[0]) + k} mod 26 = ${encWord[0]}.`,
-                        explanation: `Plaintext <strong>${word}</strong> shifted by +${k}:<br>` +
-                            word.split('').map((ch, idx) => `${ch} (${utils.letterToNum(ch)}) + ${k} = ${(utils.letterToNum(ch)+k)%26} (${encWord[idx]})`).join(', ') +
-                            `<br>Result: <strong>${encWord}</strong>`
+                        question: `Encrypt the word <strong>"${d.word}"</strong> using a Caesar shift key of <span class="highlight-key">k = ${d.k}</span>.<br><small class="text-muted">Use formula $C = (P + ${d.k}) \\pmod{26}$. Enter ciphertext in uppercase.</small>`,
+                        correctAnswer: d.enc,
+                        hint: `Shift each letter forward by ${d.k}. For example, ${d.word[0]} (${utils.letterToNum(d.word[0])}) + ${d.k} = ${utils.letterToNum(d.word[0]) + d.k} mod 26 = ${d.enc[0]}.`,
+                        explanation: `Plaintext <strong>${d.word}</strong> shifted by +${d.k}:<br>` +
+                            d.word.split('').map((ch, idx) => `${ch} (${utils.letterToNum(ch)}) + ${d.k} = ${(utils.letterToNum(ch)+d.k)%26} (${d.enc[idx]})`).join(', ') +
+                            `<br>Result: <strong>${d.enc}</strong>`
                     });
 
                     pool.push({
@@ -262,16 +265,16 @@
                         difficulty: 'easy',
                         type: 'text',
                         title: 'Caesar Cipher: Modular Decryption',
-                        question: `Decrypt the ciphertext <strong>"${encWord}"</strong> which was encrypted with Caesar key <span class="highlight-key">k = ${k}</span>.<br><small class="text-muted">Formula: $P = (C - ${k} + 26) \\pmod{26}$.</small>`,
-                        correctAnswer: word,
-                        hint: `Shift each letter backward by ${k}. ${encWord[0]} (${utils.letterToNum(encWord[0])}) - ${k} = ${utils.letterToNum(word[0])} = ${word[0]}.`,
-                        explanation: `Ciphertext <strong>${encWord}</strong> shifted back by -${k}:<br>` +
-                            encWord.split('').map((ch, idx) => `${ch} (${utils.letterToNum(ch)}) - ${k} = ${utils.mod(utils.letterToNum(ch)-k, 26)} (${word[idx]})`).join(', ') +
-                            `<br>Original Plaintext: <strong>${word}</strong>`
+                        question: `Decrypt the ciphertext <strong>"${d.enc}"</strong> which was encrypted with Caesar key <span class="highlight-key">k = ${d.k}</span>.<br><small class="text-muted">Formula: $P = (C - ${d.k} + 26) \\pmod{26}$.</small>`,
+                        correctAnswer: d.word,
+                        hint: `Shift each letter backward by ${d.k}. ${d.enc[0]} (${utils.letterToNum(d.enc[0])}) - ${d.k} = ${utils.letterToNum(d.word[0])} = ${d.word[0]}.`,
+                        explanation: `Ciphertext <strong>${d.enc}</strong> shifted back by -${d.k}:<br>` +
+                            d.enc.split('').map((ch, idx) => `${ch} (${utils.letterToNum(ch)}) - ${d.k} = ${utils.mod(utils.letterToNum(ch)-d.k, 26)} (${d.word[idx]})`).join(', ') +
+                            `<br>Original Plaintext: <strong>${d.word}</strong>`
                     });
-                }
+                });
 
-                // Medium: Find Key
+                // Medium: Known-Plaintext Key Deduction (Single Letter)
                 pool.push({
                     cipher: 'caesar',
                     difficulty: 'medium',
@@ -283,7 +286,19 @@
                     explanation: `Formula: $k = (C - P + 26) \\pmod{26}$.<br>$P = 'D' = 3$, $C = 'Q' = 16$.<br>$k = (16 - 3) = 13$. The key is <strong>13</strong> (ROT13).`
                 });
 
-                // Hard: Modulo Arithmetic wrap-around
+                // Medium: Word Known-Plaintext Deduction
+                pool.push({
+                    cipher: 'caesar',
+                    difficulty: 'medium',
+                    type: 'number',
+                    title: 'Caesar Cipher: Crib Deduction from Word',
+                    question: `A military crib indicates that the intercepted ciphertext word <strong>"AOL"</strong> corresponds to the plaintext word <strong>"THE"</strong>.<br>What is the shift key $k$?`,
+                    correctAnswer: '7',
+                    hint: `T is position 19, and A is position 0. Calculate $(0 - 19 + 26) \\pmod{26}$.`,
+                    explanation: `Formula: $k = (C - P + 26) \\pmod{26}$.<br>For first letter: $T = 19$, $A = 0$.<br>$k = (0 - 19 + 26) \\pmod{26} = 7$.<br>Verification: $H(7) + 7 = 14 (O)$, $E(4) + 7 = 11 (L)$. The key is <strong>7</strong>.`
+                });
+
+                // Hard: Negative Modulo Arithmetic wrap-around
                 pool.push({
                     cipher: 'caesar',
                     difficulty: 'hard',
@@ -294,11 +309,39 @@
                     hint: `P = (4 - 18 + 26) mod 26 = (-14 + 26) mod 26 = 12 mod 26. Position 12 is 'M'.`,
                     explanation: `$P = (C - k + 26) \\pmod{26} = (4 - 18 + 26) \\pmod{26} = 12 \\pmod{26}$.<br>Letter at index 12 is <strong>'M'</strong>.`
                 });
+
+                // Hard: Modulo Wrap Boundary Calculation
+                pool.push({
+                    cipher: 'caesar',
+                    difficulty: 'hard',
+                    type: 'text',
+                    title: 'Caesar Cipher: Wrap-Around Boundary',
+                    question: `Encrypt the letter <strong>'Z'</strong> ($P = 25$) with shift key $k = 9$.<br>Enter the single resulting ciphertext letter.`,
+                    correctAnswer: 'I',
+                    hint: `Calculate (25 + 9) mod 26 = 34 mod 26. Index 8 is 'I'.`,
+                    explanation: `$C = (P + k) \\pmod{26} = (25 + 9) \\pmod{26} = 34 \\pmod{26} = 8$.<br>Letter at index 8 is <strong>'I'</strong>.`
+                });
+
+                // Hard: Frequency Analysis Peak Deduction
+                pool.push({
+                    cipher: 'caesar',
+                    difficulty: 'hard',
+                    type: 'number',
+                    title: 'Caesar Cryptanalysis: Frequency Peak Shift',
+                    question: `You perform single-letter frequency analysis on a Caesar-encrypted ciphertext and find that letter <strong>'R'</strong> (index 17) is the dominant peak with 12.8% frequency.<br>Assuming 'R' corresponds to standard English letter <strong>'E'</strong> (index 4), what shift key $k$ was used?`,
+                    correctAnswer: '13',
+                    hint: `Solve for k in: C = (P + k) mod 26, where C = 17 and P = 4.`,
+                    explanation: `Formula: $k = (C - P + 26) \\pmod{26}$.<br>$k = (17 - 4) = 13$. The shift key is <strong>13</strong>.`
+                });
             }
 
-            // 2. Monoalphabetic Questions Generator
+            // =================================================================
+            // 2. Monoalphabetic Substitution Question Bank (15 Questions)
+            // =================================================================
             if (ciphers.indexOf('monoalphabetic') !== -1) {
                 var testKey = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+
+                // Easy 1: QWERTY CAB -> EQW
                 pool.push({
                     cipher: 'monoalphabetic',
                     difficulty: 'easy',
@@ -310,6 +353,43 @@
                     explanation: `Mapping:<br>C (idx 2) $\\to$ E<br>A (idx 0) $\\to$ Q<br>B (idx 1) $\\to$ W<br>Ciphertext: <strong>EQW</strong>`
                 });
 
+                // Easy 2: QWERTY BED -> WTR
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'easy',
+                    type: 'text',
+                    title: 'Monoalphabetic: Substitution Encryption',
+                    question: `Using the QWERTY substitution alphabet:<br><span class="mono text-sm">PLAIN : ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>CIPHER: QWERTYUIOPASDFGHJKLZXCVBNM</span><br><br>Encrypt the plaintext word <strong>"BED"</strong>.`,
+                    correctAnswer: 'WTR',
+                    hint: `B is index 1 -> W. E is index 4 -> T. D is index 3 -> R.`,
+                    explanation: `Mapping:<br>B (idx 1) $\\to$ W<br>E (idx 4) $\\to$ T<br>D (idx 3) $\\to$ R<br>Ciphertext: <strong>WTR</strong>`
+                });
+
+                // Easy 3: QWERTY MAP -> DQH
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'easy',
+                    type: 'text',
+                    title: 'Monoalphabetic: Substitution Encryption',
+                    question: `Using the QWERTY substitution alphabet:<br><span class="mono text-sm">PLAIN : ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>CIPHER: QWERTYUIOPASDFGHJKLZXCVBNM</span><br><br>Encrypt the plaintext word <strong>"MAP"</strong>.`,
+                    correctAnswer: 'DQH',
+                    hint: `M is index 12 -> D. A is index 0 -> Q. P is index 15 -> H.`,
+                    explanation: `Mapping:<br>M (idx 12) $\\to$ D<br>A (idx 0) $\\to$ Q<br>P (idx 15) $\\to$ H<br>Ciphertext: <strong>DQH</strong>`
+                });
+
+                // Easy 4: Atbash Encryption
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'easy',
+                    type: 'text',
+                    title: 'Atbash Cipher: Reverse Substitution Encryption',
+                    question: `In the classic Atbash substitution cipher, the alphabet is reversed ($A \\leftrightarrow Z, B \\leftrightarrow Y, C \\leftrightarrow X, \\dots$).<br>Encrypt the word <strong>"WAR"</strong> into Atbash ciphertext.`,
+                    correctAnswer: 'DZI',
+                    hint: `Formula: C = 25 - P. W (22) -> 3 (D), A (0) -> 25 (Z), R (17) -> 8 (I).`,
+                    explanation: `Atbash maps index $i$ to $25 - i$:<br>W (22) $\\to$ 3 = <strong>D</strong><br>A (0) $\\to$ 25 = <strong>Z</strong><br>R (17) $\\to$ 8 = <strong>I</strong><br>Ciphertext: <strong>DZI</strong>`
+                });
+
+                // Medium 1: Decryption ITSSG -> HELLO
                 pool.push({
                     cipher: 'monoalphabetic',
                     difficulty: 'medium',
@@ -321,6 +401,43 @@
                     explanation: `Mapping in reverse:<br>I $\\to$ H<br>T $\\to$ E<br>S $\\to$ L<br>S $\\to$ L<br>G $\\to$ O<br>Decrypted Plaintext: <strong>HELLO</strong>`
                 });
 
+                // Medium 2: Decryption WTZ -> BET
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Monoalphabetic: Substitution Decryption',
+                    question: `Using the QWERTY substitution alphabet:<br><span class="mono text-sm">PLAIN : ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>CIPHER: QWERTYUIOPASDFGHJKLZXCVBNM</span><br><br>Decrypt the ciphertext word <strong>"WTZ"</strong>.`,
+                    correctAnswer: 'BET',
+                    hint: `W is in position 1 in CIPHER (Plain B). T is in position 4 (Plain E). Z is in position 19 (Plain T).`,
+                    explanation: `Inverted mapping:<br>W $\\to$ B<br>T $\\to$ E<br>Z $\\to$ T<br>Decrypted Plaintext: <strong>BET</strong>`
+                });
+
+                // Medium 3: Decryption QW -> AB
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Monoalphabetic: Substitution Decryption',
+                    question: `Using the QWERTY substitution alphabet, decrypt the 2-letter ciphertext <strong>"QW"</strong>.`,
+                    correctAnswer: 'AB',
+                    hint: `Q maps to A, and W maps to B.`,
+                    explanation: `Q $\\to$ A, W $\\to$ B. Decrypted plaintext: <strong>AB</strong>.`
+                });
+
+                // Medium 4: Atbash Decryption
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Atbash Cipher: Reverse Substitution Decryption',
+                    question: `Decrypt the Atbash ciphertext word <strong>"ML"</strong> ($P = 25 - C$).`,
+                    correctAnswer: 'NO',
+                    hint: `M is index 12 -> 25 - 12 = 13 (N). L is index 11 -> 25 - 11 = 14 (O).`,
+                    explanation: `Atbash decryption:<br>M (12) $\\to 25 - 12 = 13 = $ <strong>N</strong><br>L (11) $\\to 25 - 11 = 14 = $ <strong>O</strong><br>Plaintext: <strong>NO</strong>`
+                });
+
+                // Medium 5: Peak Identification
                 pool.push({
                     cipher: 'monoalphabetic',
                     difficulty: 'medium',
@@ -338,6 +455,79 @@
                     explanation: `In standard English text, <strong>'E'</strong> is by far the most frequent letter (~12.7%), followed closely by <strong>'T'</strong> (~9.1%). In monoalphabetic substitution, letter frequencies are fully preserved, so 'Z' (12.8%) is almost certainly 'E' and 'P' (9.2%) is 'T'.`
                 });
 
+                // Medium 6: Low Frequency English Letters
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'medium',
+                    type: 'choice',
+                    title: 'Frequency Analysis: Low-Frequency Tails',
+                    question: `In standard English frequency analysis, which cluster of letters typically exhibits the lowest individual frequencies (under 0.5% each)?`,
+                    options: [
+                        'Z, Q, X, J',
+                        'E, T, A, O',
+                        'R, N, S, H',
+                        'D, L, C, M'
+                    ],
+                    correctAnswer: 'Z, Q, X, J',
+                    hint: `Think of the rarest letters in English and Scrabble high-value tiles.`,
+                    explanation: `The least frequent letters in English are <strong>Z, Q, X, and J</strong> (each typically < 0.2% - 0.5%). Letters like E, T, A, O are top-tier vowels/consonants.`
+                });
+
+                // Hard 1: Top English Bigram
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'hard',
+                    type: 'choice',
+                    title: 'Cryptanalysis: Digram Frequency Matching',
+                    question: `In an English monoalphabetic cryptogram, the bigram <strong>"ZW"</strong> appears far more frequently than any other pair (representing ~3.5% of all bigrams). What English digram does "ZW" most likely represent?`,
+                    options: [
+                        'TH',
+                        'QZ',
+                        'XJ',
+                        'WW'
+                    ],
+                    correctAnswer: 'TH',
+                    hint: `The most common two-letter pair in the English language starts words like "the", "that", "this".`,
+                    explanation: `<strong>TH</strong> is the single most frequent bigram in the English language by a wide margin (~3.56%), followed by HE, IN, ER, AN, and RE.`
+                });
+
+                // Hard 2: Pattern Word Analysis
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'hard',
+                    type: 'choice',
+                    title: 'Cryptanalysis: Word Pattern Deduction',
+                    question: `An encrypted monoalphabetic word has the ciphertext structure <strong>"XYXZWA"</strong>, where the 1st and 3rd letters are identical ($X$). Which English plaintext word matches this letter pattern?`,
+                    options: [
+                        'SYSTEM',
+                        'PEOPLE',
+                        'BANANA',
+                        'ATTACK'
+                    ],
+                    correctAnswer: 'SYSTEM',
+                    hint: `Look at the pattern: position 1 and 3 are the same letter, and no other letters repeat.`,
+                    explanation: `Checking pattern for "XYXZWA":<br>• In <strong>SYSTEM</strong>: S-Y-S-T-E-M has 'S' at index 0 and 2. All other letters (Y, T, E, M) are distinct. Exact match!<br>• PEOPLE has identical letters at 0 and 3 (P-E-O-P).<br>• BANANA repeats at 1, 3, 5 (A-A-A).`
+                });
+
+                // Hard 3: Single-Letter English Words
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'hard',
+                    type: 'choice',
+                    title: 'Cryptanalysis: Isolated Single-Letter Words',
+                    question: `In a monoalphabetic substitution ciphertext with word spaces preserved, you spot two distinct isolated single-letter words: <strong>"X"</strong> and <strong>"Y"</strong>.<br>In standard English grammar, which two letters do these almost certainly represent?`,
+                    options: [
+                        'A and I',
+                        'E and T',
+                        'O and U',
+                        'S and Z'
+                    ],
+                    correctAnswer: 'A and I',
+                    hint: `What are the only two single-letter words permitted in standard English grammar?`,
+                    explanation: `In standard English, the only grammatical single-letter words are <strong>"A"</strong> (indefinite article) and <strong>"I"</strong> (first-person pronoun). Spotting single-letter words provides immediate anchor points in frequency analysis.`
+                });
+
+                // Hard 4: Key Space Paradox
                 pool.push({
                     cipher: 'monoalphabetic',
                     difficulty: 'hard',
@@ -354,10 +544,31 @@
                     hint: `Exhaustive brute force is impossible ($26!$ takes trillions of years), but frequency analysis is an analytical shortcut.`,
                     explanation: `Exhaustive search of $26!$ is completely impossible by hand or computer. However, an attacker does NOT need to test all keys because each plaintext letter deterministically maps to one ciphertext letter, perfectly preserving English frequency distributions and bigrams.`
                 });
+
+                // Hard 5: Caesar vs Monoalphabetic Key Space Comparison
+                pool.push({
+                    cipher: 'monoalphabetic',
+                    difficulty: 'hard',
+                    type: 'choice',
+                    title: 'Key Space Comparison: Caesar vs Monoalphabetic',
+                    question: `How many effective, non-trivial keys exist in the Caesar cipher compared to the Monoalphabetic substitution cipher?`,
+                    options: [
+                        '25 keys vs 26! (approx 4.03 × 10²⁶) keys',
+                        '26 keys vs 26 keys',
+                        '500 keys vs 1 million keys',
+                        '25 keys vs 25! keys'
+                    ],
+                    correctAnswer: '25 keys vs 26! (approx 4.03 × 10²⁶) keys',
+                    hint: `Caesar shifts by 1 to 25 positions. Monoalphabetic permutes all 26 letters in any order.`,
+                    explanation: `Caesar cipher has only <strong>25 non-trivial shift keys</strong> ($k \\in \\{1, \\dots, 25\\}$), easily brute-forced in seconds. Monoalphabetic substitution has <strong>$26! \\approx 4.03 \\times 10^{26}$ keys</strong>.`
+                });
             }
 
-            // 3. Playfair Questions Generator
+            // =================================================================
+            // 3. Playfair Cipher Question Bank (15 Questions)
+            // =================================================================
             if (ciphers.indexOf('playfair') !== -1) {
+                // Easy 1: Digraph prep BALLOON
                 pool.push({
                     cipher: 'playfair',
                     difficulty: 'easy',
@@ -365,15 +576,88 @@
                     title: 'Playfair Cipher: Digraph Preparation Rules',
                     question: `Prepare the plaintext word <strong>"BALLOON"</strong> into valid Playfair digraph pairs before encryption.<br><small class="text-muted">Separate pairs by spaces (e.g. "AB CD EF"). Handle double letters and odd length with filler 'X'.</small>`,
                     correctAnswer: 'BA LX LO ON',
-                    hint: `Group into pairs: B-A (ok). Next is L-L (identical letters in same pair!) -> insert X to get L-X. Next is L-O (ok). Remaining is single N -> append X to get O-N... wait, L-O then O-N! Let's check: B-A, L-X, L-O, O-N? Wait, L-X leaves O-O, so O-X, then N-X? Let's trace carefully: B-A, L(duplicate L -> insert X) -> L-X, then remaining is O-O-N -> O(duplicate O -> insert X) -> O-X, then N -> N-X! Wait, let's verify: BALLOON: B-A | L-X | L-O | O-N? No, second pair was LX, so next letters are L, O, O, N. Pair 3 is L-O. Pair 4 has O, N -> O-N! Letters: BA LX LO ON. Total letters = 8 = 4 pairs!`,
+                    hint: `Pair 1: B-A. Pair 2: L with identical L -> insert X to get L-X. Pair 3: remaining L with O -> L-O. Pair 4: O with N -> O-N.`,
                     explanation: `Tracing "BALLOON":<br>1. Pair 1: 'B', 'A' $\\to$ <strong>BA</strong><br>2. Pair 2: 'L', next is 'L' (same letter in same pair!) $\\to$ insert filler 'X': <strong>LX</strong><br>3. Next letters are 'L', 'O' $\\to$ <strong>LO</strong><br>4. Next letters are 'O', 'N' $\\to$ <strong>ON</strong><br>Resulting digraphs: <strong>BA LX LO ON</strong> (no trailing pad needed as length is 8).`
                 });
 
+                // Easy 2: Digraph prep COMMITTEE
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'easy',
+                    type: 'text',
+                    title: 'Playfair Cipher: Sequential Double Letters',
+                    question: `Prepare the plaintext word <strong>"COMMITTEE"</strong> into valid Playfair digraph pairs.<br><small class="text-muted">Separate pairs by spaces (e.g. "AB CD EF..."). Insert filler 'X' for duplicate letters in a pair and pad if needed.</small>`,
+                    correctAnswer: 'CO MX MI TX TE EX',
+                    hint: `C-O, then M-M splits to M-X, then M-I, then T-T splits to T-X, then T-E, then single E gets padded with X to E-X.`,
+                    explanation: `Tracing "COMMITTEE":<br>• C, O $\\to$ <strong>CO</strong><br>• M, M (split with X) $\\to$ <strong>MX</strong><br>• M, I $\\to$ <strong>MI</strong><br>• T, T (split with X) $\\to$ <strong>TX</strong><br>• T, E $\\to$ <strong>TE</strong><br>• E (odd trailing letter, pad with X) $\\to$ <strong>EX</strong><br>Result: <strong>CO MX MI TX TE EX</strong>.`
+                });
+
+                // Easy 3: Digraph prep SUCCESS
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'easy',
+                    type: 'text',
+                    title: 'Playfair Cipher: Double Letter Splitting & Padding',
+                    question: `Prepare the word <strong>"SUCCESS"</strong> into valid Playfair digraph pairs.<br><small class="text-muted">Format: pairs separated by single spaces.</small>`,
+                    correctAnswer: 'SU CX CE SX SX',
+                    hint: `S-U, then C-C splits to C-X, then C-E, then S-S splits to S-X, then trailing S gets padded to S-X.`,
+                    explanation: `Digraph division for "SUCCESS":<br>• S, U $\\to$ <strong>SU</strong><br>• C, C (split) $\\to$ <strong>CX</strong><br>• C, E $\\to$ <strong>CE</strong><br>• S, S (split) $\\to$ <strong>SX</strong><br>• S (pad) $\\to$ <strong>SX</strong><br>Result: <strong>SU CX CE SX SX</strong>.`
+                });
+
+                // Medium 1: Tricky Digraph LOOKOUT
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair Digraphs: Non-Adjacent Pair Integrity',
+                    question: `Prepare the word <strong>"LOOKOUT"</strong> into Playfair digraphs.<br>Careful: Do the two 'O' letters get split by 'X'?<br><small class="text-muted">Separate pairs by spaces.</small>`,
+                    correctAnswer: 'LO OK OU TX',
+                    hint: `Pair 1: L-O. Pair 2: the second O is paired with K (O-K)! Because they are in different pairs, NO filler is inserted between them! Next is O-U, then T-X.`,
+                    explanation: `In "LOOKOUT":<br>• Pair 1: 'L', 'O' $\\to$ <strong>LO</strong><br>• Pair 2: The second 'O' falls into the NEXT pair with 'K' $\\to$ <strong>OK</strong> (never insert X if letters are in separate pairs!)<br>• Pair 3: 'O', 'U' $\\to$ <strong>OU</strong><br>• Pair 4: 'T' + pad 'X' $\\to$ <strong>TX</strong><br>Result: <strong>LO OK OU TX</strong>.`
+                });
+
+                // Medium 2: Matrix Row 0 for CIPHER
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair 5×5 Matrix Construction',
+                    question: `Construct the first row (5 letters) of a 5×5 Playfair matrix using the keyword <strong>"CIPHER"</strong>.<br><small class="text-muted">Enter the 5 letters with no spaces.</small>`,
+                    correctAnswer: 'CIPHE',
+                    hint: `Write the keyword letters without duplicates from left to right. Row 0 holds the first 5 unique letters.`,
+                    explanation: `Keyword "CIPHER" has unique letters C, I, P, H, E, R.<br>First row (5 letters): <strong>CIPHE</strong> (letter 'R' starts Row 1).`
+                });
+
+                // Medium 3: Matrix Row 0 for MONARCHY
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair 5×5 Matrix Construction',
+                    question: `Construct the first row (5 letters) of a 5×5 Playfair matrix using the keyword <strong>"MONARCHY"</strong>.`,
+                    correctAnswer: 'MONAR',
+                    hint: `First 5 unique letters of MONARCHY: M, O, N, A, R.`,
+                    explanation: `Keyword letters: M-O-N-A-R-C-H-Y.<br>Row 0 takes the first 5 letters: <strong>MONAR</strong>.`
+                });
+
+                // Medium 4: Matrix Deduplication with LABORATORY
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair Matrix: Duplicate Keyword Letters',
+                    question: `Construct the first row (5 letters) of a 5×5 Playfair matrix using the keyword <strong>"LABORATORY"</strong> (skipping duplicate letters).`,
+                    correctAnswer: 'LABOR',
+                    hint: `L, A, B, O, R... next A is duplicate, next T is new, next O is duplicate, next R is duplicate, next Y is new. Take first 5.`,
+                    explanation: `Unique letters in "LABORATORY": L, A, B, O, R, T, Y.<br>Row 0 takes the first 5 unique letters: <strong>LABOR</strong>.`
+                });
+
+                // Medium 5: Same Row Rule AR -> RM
                 pool.push({
                     cipher: 'playfair',
                     difficulty: 'medium',
                     type: 'choice',
-                    title: 'Playfair Rule Identification',
+                    title: 'Playfair Rule Identification: Same Row',
                     question: `In a 5×5 Playfair matrix with keyword <strong>"MONARCHY"</strong>:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>What rule applies when encrypting the digraph <strong>"AR"</strong>?`,
                     options: [
                         'Same Row Rule (both letters are in Row 0) -> Shift Right',
@@ -386,30 +670,95 @@
                     explanation: `'A' is at (row 0, col 3) and 'R' is at (row 0, col 4). Since both letters are in <strong>Row 0</strong>, the <strong>Same Row Rule</strong> applies (shift right with wrap-around). 'A' $\\to$ 'R', and 'R' wraps to 'M'. Encrypted: <strong>RM</strong>.`
                 });
 
+                // Medium 6: Same Row Decryption RM -> AR
                 pool.push({
                     cipher: 'playfair',
                     difficulty: 'medium',
                     type: 'text',
-                    title: 'Playfair: Rectangle Rule Encryption',
-                    question: `Using the same "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Encrypt the digraph <strong>"EA"</strong> using the Rectangle Rule.<br><small class="text-muted">Enter the 2-letter encrypted pair in uppercase.</small>`,
+                    title: 'Playfair Decryption: Same Row Reverse Wrap',
+                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Decrypt the ciphertext digraph <strong>"RM"</strong>.<br><small class="text-muted">Same Row decryption shifts LEFT with circular wrap-around.</small>`,
+                    correctAnswer: 'AR',
+                    hint: `'R' is at (0, 4) and 'M' is at (0, 0). Move left: R moves left to A. M wraps left to R.`,
+                    explanation: `In Row 0: $[M, O, N, A, R]$.<br>Shift left:<br>- 'R' (col 4) moves left to col 3 $\\to$ <strong>'A'</strong>.<br>- 'M' (col 0) wraps left to col 4 $\\to$ <strong>'R'</strong>.<br>Decrypted digraph: <strong>AR</strong>.`
+                });
+
+                // Medium 7: Same Column Encryption MC -> CE
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair Encryption: Same Column Shift Down',
+                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Encrypt the digraph <strong>"MC"</strong>.<br><small class="text-muted">Both letters are in Column 0. Shift DOWN one row.</small>`,
+                    correctAnswer: 'CE',
+                    hint: `M is at (0,0) and C is at (1,0). Moving down: M -> C, C -> E.`,
+                    explanation: `Column 0 contains $[M, C, E, L, U]$.<br>Shift down:<br>- 'M' (row 0) $\\to$ 'C' (row 1).<br>- 'C' (row 1) $\\to$ 'E' (row 2).<br>Ciphertext: <strong>CE</strong>.`
+                });
+
+                // Medium 8: Same Column Decryption CL -> ME
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair Decryption: Same Column Shift UP',
+                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Decrypt the ciphertext digraph <strong>"CL"</strong>.`,
+                    correctAnswer: 'ME',
+                    hint: `'C' (row 1, col 0) moves up to row 0 ('M'). 'L' (row 3, col 0) moves up to row 2 ('E').`,
+                    explanation: `Both letters are in Column 0: $[M(0), C(1), E(2), L(3), U(4)]$.<br>Decryption shifts UP:<br>- 'C' at row 1 moves UP to row 0 $\\to$ <strong>'M'</strong>.<br>- 'L' at row 3 moves UP to row 2 $\\to$ <strong>'E'</strong>.<br>Decrypted digraph: <strong>ME</strong>.`
+                });
+
+                // Medium 9: Rectangle Rule Encryption EA -> IM
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'medium',
+                    type: 'text',
+                    title: 'Playfair Encryption: Rectangle Rule',
+                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Encrypt the digraph <strong>"EA"</strong> using the Rectangle Rule.`,
                     correctAnswer: 'IM',
                     hint: `'E' is at (row 2, col 0) and 'A' is at (row 0, col 3). E takes A's column (row 2, col 3) = 'I'. A takes E's column (row 0, col 0) = 'M'.`,
                     explanation: `Rectangle rule:<br>'E' is at $(2, 0)$ and 'A' is at $(0, 3)$.<br>- New first letter: same row as E (2), column of A (3) $\\to$ position $(2, 3) = $ <strong>'I'</strong>.<br>- New second letter: same row as A (0), column of E (0) $\\to$ position $(0, 0) = $ <strong>'M'</strong>.<br>Result: <strong>IM</strong>.`
                 });
 
+                // Hard 1: Rectangle Rule Decryption BP -> HS
                 pool.push({
                     cipher: 'playfair',
                     difficulty: 'hard',
                     type: 'text',
-                    title: 'Playfair: Same Column Decryption with Wrap-around',
-                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Decrypt the ciphertext digraph <strong>"CL"</strong>.<br><small class="text-muted">Same column rule in reverse: move UP one row, wrapping from top to bottom.</small>`,
-                    correctAnswer: 'UE',
-                    hint: `'C' is at (row 1, col 0) and 'L' is at (row 3, col 0). Both are in Column 0: M, C, E, L, U. Moving UP: C moves up to M? Wait, let's check Column 0: Row 0 is M, Row 1 is C, Row 2 is E, Row 3 is L, Row 4 is U. Moving UP from C (row 1) gives Row 0 = 'M'. Moving UP from L (row 3) gives Row 2 = 'E'. So C->M, L->E -> 'ME'! Wait, let's verify!`,
-                    explanation: `Both letters are in Column 0: $[M(0), C(1), E(2), L(3), U(4)]$.<br>Decryption shifts UP:<br>- 'C' at row 1 moves UP to row 0 $\\to$ <strong>'M'</strong>.<br>- 'L' at row 3 moves UP to row 2 $\\to$ <strong>'E'</strong>.<br>Decrypted digraph: <strong>ME</strong>.`
+                    title: 'Playfair Decryption: Rectangle Rule',
+                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Decrypt the ciphertext digraph <strong>"BP"</strong>.`,
+                    correctAnswer: 'HS',
+                    hint: `'B' is at (1, 3) and 'P' is at (3, 1). B takes P's column (1) -> (1, 1) = 'H'. P takes B's column (3) -> (3, 3) = 'S'.`,
+                    explanation: `Rectangle rule in reverse (column swap is self-inverse):<br>• 'B' at $(1, 3)$, 'P' at $(3, 1)$.<br>• B takes column 1 $\\to (1, 1) = $ <strong>'H'</strong>.<br>• P takes column 3 $\\to (3, 3) = $ <strong>'S'</strong>.<br>Decrypted plaintext: <strong>HS</strong>.`
                 });
 
-                // Update correctAnswer for that column question to ME
-                pool[pool.length - 1].correctAnswer = 'ME';
+                // Hard 2: Rectangle Rule Encryption HS -> BP
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'hard',
+                    type: 'text',
+                    title: 'Playfair Encryption: Rectangle Rule',
+                    question: `Using the "MONARCHY" matrix:<br><span class="mono text-sm">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span><br>Encrypt the digraph <strong>"HS"</strong>.`,
+                    correctAnswer: 'BP',
+                    hint: `'H' is at (1, 1) and 'S' is at (3, 3). H takes S's column (3) -> 'B'. S takes H's column (1) -> 'P'.`,
+                    explanation: `'H' $(1, 1)$ and 'S' $(3, 3)$ form a rectangle corners:<br>• H takes column 3 $\\to (1, 3) = $ <strong>'B'</strong>.<br>• S takes column 1 $\\to (3, 1) = $ <strong>'P'</strong>.<br>Ciphertext: <strong>BP</strong>.`
+                });
+
+                // Hard 3: Security Invariant / Digraph Frequency
+                pool.push({
+                    cipher: 'playfair',
+                    difficulty: 'hard',
+                    type: 'choice',
+                    title: 'Cryptanalysis: Playfair Frequency Resistance',
+                    question: `Why does the Playfair cipher provide significantly stronger resistance to frequency analysis than Caesar or Monoalphabetic substitution?`,
+                    options: [
+                        'Because encrypting digraph pairs spreads 26 letters into 600+ pairs, flattening single-letter frequency spikes',
+                        'Because it rotates the 5×5 matrix 90 degrees after every pair is encrypted',
+                        'Because it uses modern 128-bit modular exponential arithmetic',
+                        'Because no consonants are ever encrypted'
+                    ],
+                    correctAnswer: 'Because encrypting digraph pairs spreads 26 letters into 600+ pairs, flattening single-letter frequency spikes',
+                    hint: `Think about analyzing single letters (26 possibilities) versus pairs of letters (25 × 24 = 600 possibilities).`,
+                    explanation: `In Playfair, encryption operates on <strong>digraphs (pairs of letters)</strong> rather than individual characters. This expands the unit of substitution from 26 letters to $25 \\times 25 - 25 = 600$ valid digraph pairs, dramatically flattening English single-letter frequency spikes and requiring a much larger ciphertext volume for statistical cryptanalysis.`
+                });
             }
 
             // Shuffle pool and return requested count
@@ -428,7 +777,21 @@
         }
 
         app.exam = {
-            generateExamQuestions: generateExamQuestions
+            generateExamQuestions: generateExamQuestions,
+            solveChallenge1: function(k, plain) {
+                var expected = "THEEXPEDITIONHASSUCCEEDEDMEETATTHERIVER";
+                return k === 3 && utils.cleanText(plain) === expected;
+            },
+            solveChallenge2: function(plain) {
+                return utils.cleanText(plain) === "ARBYBGRL";
+            },
+            solveChallenge3: function(plain) {
+                var clean = utils.cleanText(plain);
+                return clean === "INSTRUMENTS" || clean === "INSTRUMENTSX";
+            },
+            solveChallenge4: function(plain) {
+                return utils.cleanText(plain) === "THESECRETISSAFE";
+            }
         };
 
         app.registerModule('exam', function(container) {
@@ -1248,6 +1611,147 @@
                         </div>
                         <div id="chal2-feedback" class="exercise-feedback"></div>
                     </div>
+
+                    <!-- Challenge 3 -->
+                    <div class="exercise-box" id="challenge-box-3" style="margin-top: 1.5rem;">
+                        <span class="exercise-badge hard">Challenge 3</span>
+                        <div class="exercise-question">
+                            <strong>The Field Commander's Grid Intercept (Full Playfair Decryption)</strong><br>
+                            An encrypted battlefield transmission has been intercepted:<br>
+                            <span class="mono highlight-cipher" style="font-size: 1.15rem; display: block; margin: 0.5rem 0; letter-spacing: 0.1em;">"GATLMZCLRQXA"</span>
+                            Intelligence confirms the enemy's keyword is <strong>"MONARCHY"</strong>.<br>
+                            Decrypt all 6 digraph pairs to recover the plaintext intelligence dispatch.
+                        </div>
+
+                        <div class="collapsible" id="chal3-hints">
+                            <div class="collapsible-header"><span>Need Hints? (Click to reveal step-by-step coordinates)</span></div>
+                            <div class="collapsible-body">
+                                <p><strong>Hint 1:</strong> 5×5 Matrix for "MONARCHY":<br>
+                                <span class="mono">M O N A R<br>C H Y B D<br>E F G I K<br>L P Q S T<br>U V W X Z</span></p>
+                                <p><strong>Hint 2:</strong> Split into 6 pairs: <code>GA</code>, <code>TL</code>, <code>MZ</code>, <code>CL</code>, <code>RQ</code>, <code>XA</code>.</p>
+                                <p><strong>Hint 3:</strong><br>
+                                • GA: Rectangle $\to$ IN<br>
+                                • TL: Same row 3 (L P Q S T), move left $\to$ ST<br>
+                                • MZ: Rectangle $\to$ RU<br>
+                                • CL: Same col 0 (M C E L U), move up $\to$ ME<br>
+                                • RQ: Rectangle $\to$ NT<br>
+                                • XA: Same col 3 (A B I S X), move up $\to$ SX.<br>
+                                Combined: "INSTRUMENTSX" (trailing X is padding) $\to$ <strong>INSTRUMENTS</strong>.</p>
+                            </div>
+                        </div>
+
+                        <div class="input-inline" style="margin-top: 0.75rem;">
+                            <div class="input-group">
+                                <label>Decrypted Plaintext:</label>
+                                <input type="text" id="chal3-plain-input" class="mono" placeholder="Enter plaintext (e.g. INSTRUMENTS)...">
+                            </div>
+                            <button id="btn-check-chal3" class="btn btn-primary">Check Solution</button>
+                        </div>
+                        <div id="chal3-feedback" class="exercise-feedback"></div>
+                    </div>
+
+                    <!-- Challenge 4 -->
+                    <div class="exercise-box" id="challenge-box-4" style="margin-top: 1.5rem;">
+                        <span class="exercise-badge medium">Challenge 4</span>
+                        <div class="exercise-question">
+                            <strong>The Shadow Agent's Code Recognition (Atbash Mystery)</strong><br>
+                            A covert agent left a short intercepted message before vanishing:<br>
+                            <span class="mono highlight-cipher" style="font-size: 1.15rem; display: block; margin: 0.5rem 0; letter-spacing: 0.1em;">"GSV HVXIVG RH HZUV"</span>
+                            Identify the ancient symmetric reverse-alphabet cipher and recover the plaintext dispatch.
+                        </div>
+
+                        <div class="collapsible" id="chal4-hints">
+                            <div class="collapsible-header"><span>Need Hints? (Click to reveal cipher clues)</span></div>
+                            <div class="collapsible-body">
+                                <p><strong>Hint 1:</strong> Look at "GSV". G is letter #6 and T is letter #19 ($6 + 19 = 25$). S is #18 and H is #7 ($18 + 7 = 25$). V is #21 and E is #4 ($21 + 4 = 25$).</p>
+                                <p><strong>Hint 2:</strong> This is the biblical/classical <strong>Atbash cipher</strong>, where $A \leftrightarrow Z$, $B \leftrightarrow Y$, $C \leftrightarrow X$, etc. (formula $P = 25 - C$).</p>
+                                <p><strong>Hint 3:</strong> "GSV" $\to$ THE. "RH" $\to$ IS. "HZUV" $\to$ SAFE. What does "HVXIVG" translate to?</p>
+                            </div>
+                        </div>
+
+                        <div class="input-inline" style="margin-top: 0.75rem;">
+                            <div class="input-group">
+                                <label>Decrypted Plaintext:</label>
+                                <input type="text" id="chal4-plain-input" class="mono" placeholder="e.g. THE SECRET...">
+                            </div>
+                            <button id="btn-check-chal4" class="btn btn-primary">Check Solution</button>
+                        </div>
+                        <div id="chal4-feedback" class="exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ⚡ Rapid-Fire Speed Drill Mode -->
+            <div class="card" id="speed-drill-card" style="margin-top: 2rem;">
+                <div class="card-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <span style="font-size: 1.35rem;">⚡</span>
+                        <div>
+                            <h3 style="margin: 0; color: #fff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">Rapid-Fire Speed Drill (60-Second Blitz)</h3>
+                            <div style="font-size: 0.8rem; opacity: 0.9; font-weight: normal;">Test your mental modular arithmetic, ROT13 conversions, and cipher rules under pressure!</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span class="badge" style="background: rgba(0,0,0,0.25); color: #fff; font-size: 0.85rem; padding: 0.35rem 0.75rem;">High Score: <strong id="speed-drill-highscore">0</strong></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="speed-drill-idle" style="text-align: center; padding: 1.5rem 0;">
+                        <p style="font-size: 1.05rem; max-width: 600px; margin: 0 auto 1.5rem;">Can you solve quick crypto calculations under pressure? You have <strong>60 seconds</strong> to answer as many fast mental modulo, letter index, and Playfair rule flash cards as you can!</p>
+                        <button id="btn-start-speed-drill" class="btn btn-warning btn-lg" style="font-weight: 800; font-size: 1.1rem; padding: 0.75rem 2.25rem;">⚡ Start 60s Speed Drill</button>
+                    </div>
+
+                    <div id="speed-drill-active" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                <div>
+                                    <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 700;">Time Remaining</div>
+                                    <div id="speed-drill-timer" style="font-size: 1.9rem; font-weight: 800; font-family: var(--font-mono); color: #f59e0b;">60s</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 700;">Score</div>
+                                    <div id="speed-drill-score" style="font-size: 1.9rem; font-weight: 800; font-family: var(--font-mono); color: var(--success);">0</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 700;">Streak</div>
+                                    <div id="speed-drill-streak" style="font-size: 1.9rem; font-weight: 800; font-family: var(--font-mono); color: #ec4899;">0 🔥</div>
+                                </div>
+                            </div>
+                            <button id="btn-quit-speed-drill" class="btn btn-secondary btn-sm">Stop Drill</button>
+                        </div>
+
+                        <div class="exercise-box" style="margin: 0; padding: 1.75rem 1.5rem; text-align: center; background: var(--bg-surface-subtle); border: 2px solid var(--border-medium);">
+                            <div id="speed-drill-category" class="exercise-badge easy" style="margin-bottom: 0.75rem;">Mental Arithmetic</div>
+                            <div id="speed-drill-prompt" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 1.25rem; min-height: 2.2rem; font-family: var(--font-mono);">
+                                (18 + 7) mod 26 = ?
+                            </div>
+
+                            <div id="speed-drill-options" style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                                <!-- Speed Drill Option Buttons -->
+                            </div>
+                            <div id="speed-drill-live-feedback" style="min-height: 1.5rem; font-weight: 700;"></div>
+                        </div>
+                    </div>
+
+                    <div id="speed-drill-results" style="display: none; text-align: center; padding: 1.5rem 0;">
+                        <h3 id="speed-drill-final-title" style="font-size: 1.6rem; margin-bottom: 0.5rem;">⏱️ Time's Up!</h3>
+                        <p id="speed-drill-final-desc" style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1.5rem;"></p>
+                        <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.75rem;">
+                            <div class="stat-card" style="min-width: 130px;">
+                                <div class="stat-value" id="speed-drill-final-score">0</div>
+                                <div class="stat-label">Final Score</div>
+                            </div>
+                            <div class="stat-card" style="min-width: 130px;">
+                                <div class="stat-value" id="speed-drill-final-accuracy">100%</div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                            <div class="stat-card" style="min-width: 130px;">
+                                <div class="stat-value" id="speed-drill-best-streak">0</div>
+                                <div class="stat-label">Best Streak</div>
+                            </div>
+                        </div>
+                        <button id="btn-restart-speed-drill" class="btn btn-warning btn-lg" style="font-weight: 800; padding: 0.75rem 2rem;">⚡ Play Again</button>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -1278,23 +1782,6 @@
         // Challenge 2 Solver
         container.querySelector('#btn-check-chal2').addEventListener('click', function() {
             var plain = utils.cleanText(container.querySelector('#chal2-plain-input').value);
-            // Matrix:
-            // M O N A R
-            // C H Y B D
-            // E F G I K
-            // L P Q S T
-            // U V W X Z
-            // 1. RM: R(0,4), M(0,0). Row 0: shift left -> R->A, M->R. => "AR"
-            // 2. DB: D(1,4), B(1,3). Row 1: shift left -> D->B, B->Y. => "BY"
-            // 3. YI: Y(1,2), I(2,3). Rectangle: Y takes I's col(3) -> B(1,3). I takes Y's col(2) -> G(2,2). => "BG"
-            // 4. MT: M(0,0), T(3,4). Rectangle: M takes T's col(4) -> R(0,4). T takes M's col(0) -> L(3,0). => "RL"
-            // Wait, let's check YI: Y is row 1 col 2. I is row 2 col 3.
-            // Y in col 3 -> (1,3) = B.
-            // I in col 2 -> (2,2) = G.
-            // Wait, let's check MT: M is (0,0), T is (3,4).
-            // M row 0, col 4 = R.
-            // T row 3, col 0 = L.
-            // Let's accept ARBYBGRL or AR BY BG RL, or if user decrypted to words:
             var expectedClean = "ARBYBGRL";
             var fb = container.querySelector('#chal2-feedback');
             fb.classList.add('show');
@@ -1308,6 +1795,321 @@
                 fb.innerHTML = `You entered: <span class="mono">${plain || '(empty)'}</span>.<br>Expected: <strong>AR BY BG RL</strong>.<br>RM $\\to$ AR (Row 0 left)<br>DB $\\to$ BY (Row 1 left)<br>YI $\\to$ BG (Rectangle swap)<br>MT $\\to$ RL (Rectangle swap).`;
             }
         });
+
+        // Challenge 3 Solver (Full Playfair INSTRUMENTS)
+        container.querySelector('#btn-check-chal3').addEventListener('click', function() {
+            var plain = utils.cleanText(container.querySelector('#chal3-plain-input').value);
+            var fb = container.querySelector('#chal3-feedback');
+            fb.classList.add('show');
+
+            if (plain === "INSTRUMENTS" || plain === "INSTRUMENTSX") {
+                fb.className = 'exercise-feedback show correct-feedback';
+                fb.innerHTML = '🎉 <strong>Masterful Cryptanalysis!</strong> Message recovered: <strong>INSTRUMENTS</strong>.<br>GA $\\to$ IN, TL $\\to$ ST, MZ $\\to$ RU, CL $\\to$ ME, RQ $\\to$ NT, XA $\\to$ SX.<br>All digraph coordinates and wrapping handled flawlessly!';
+                container.querySelector('#challenge-box-3').classList.add('correct');
+            } else {
+                fb.className = 'exercise-feedback show incorrect-feedback';
+                fb.innerHTML = `You entered: <span class="mono">${plain || '(empty)'}</span>.<br>Expected message: <strong>INSTRUMENTS</strong> (or INSTRUMENTSX).<br>Check pair-by-pair: GA (IN), TL (ST), MZ (RU), CL (ME), RQ (NT), XA (SX).`;
+            }
+        });
+
+        // Challenge 4 Solver (Atbash THE SECRET IS SAFE)
+        container.querySelector('#btn-check-chal4').addEventListener('click', function() {
+            var plain = utils.cleanText(container.querySelector('#chal4-plain-input').value);
+            var fb = container.querySelector('#chal4-feedback');
+            fb.classList.add('show');
+
+            if (plain === "THESECRETISSAFE") {
+                fb.className = 'exercise-feedback show correct-feedback';
+                fb.innerHTML = '🎉 <strong>Cipher Broken!</strong> Message decrypted: <strong>THE SECRET IS SAFE</strong>.<br>Atbash reverse mapping ($P = 25 - C$) identified and solved with complete precision!';
+                container.querySelector('#challenge-box-4').classList.add('correct');
+            } else {
+                fb.className = 'exercise-feedback show incorrect-feedback';
+                fb.innerHTML = `You entered: <span class="mono">${plain || '(empty)'}</span>.<br>Expected: <strong>THE SECRET IS SAFE</strong>.<br>Atbash mapping: G $\\to$ T, S $\\to$ H, V $\\to$ E, H $\\to$ S, X $\\to$ C, I $\\to$ R, R $\\to$ I, Z $\\to$ A, U $\\to$ F.`;
+            }
+        });
+
+        // =====================================================================
+        // SPEED DRILL CONTROLLER
+        // =====================================================================
+        var drillState = {
+            active: false,
+            timer: null,
+            secondsLeft: 60,
+            score: 0,
+            streak: 0,
+            bestStreak: 0,
+            totalAnswered: 0,
+            correctCount: 0,
+            currentQuestion: null
+        };
+
+        var highScore = 0;
+        try {
+            highScore = parseInt(localStorage.getItem('cryptolab_speed_drill_highscore') || '0', 10);
+            if (isNaN(highScore)) highScore = 0;
+        } catch (e) {
+            highScore = 0;
+        }
+        var highscoreEl = container.querySelector('#speed-drill-highscore');
+        if (highscoreEl) highscoreEl.textContent = highScore;
+
+        function generateSpeedDrillQuestion() {
+            var types = ['add_mod', 'sub_mod', 'letter_idx', 'rot13', 'playfair_rule'];
+            var t = types[Math.floor(Math.random() * types.length)];
+            var q = {};
+
+            if (t === 'add_mod') {
+                var a = Math.floor(Math.random() * 26);
+                var b = Math.floor(Math.random() * 25) + 1;
+                var ans = (a + b) % 26;
+                var distractors = [(ans + 1) % 26, (ans + 25) % 26, (ans + 13) % 26];
+                q = {
+                    category: 'Mental Modular Arithmetic',
+                    prompt: `(${a} + ${b}) mod 26 = ?`,
+                    correct: ans.toString(),
+                    options: utils.shuffleArray([ans.toString(), distractors[0].toString(), distractors[1].toString(), distractors[2].toString()])
+                };
+            } else if (t === 'sub_mod') {
+                var c = Math.floor(Math.random() * 26);
+                var k = Math.floor(Math.random() * 20) + 1;
+                var ans2 = utils.mod(c - k, 26);
+                var d1 = utils.mod(ans2 + 1, 26);
+                var d2 = utils.mod(ans2 - 1, 26);
+                var d3 = utils.mod(c + k, 26);
+                q = {
+                    category: 'Modular Subtraction',
+                    prompt: `(${c} − ${k} + 26) mod 26 = ?`,
+                    correct: ans2.toString(),
+                    options: utils.shuffleArray([ans2.toString(), d1.toString(), d2.toString(), d3.toString()])
+                };
+            } else if (t === 'letter_idx') {
+                var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                var idx = Math.floor(Math.random() * 26);
+                var ch = letters[idx];
+                var d_idx1 = utils.mod(idx + 1, 26);
+                var d_idx2 = utils.mod(idx - 1, 26);
+                var d_idx3 = utils.mod(idx + 5, 26);
+                q = {
+                    category: 'Letter Index (A=0)',
+                    prompt: `Numerical index of letter '${ch}' (where A=0, Z=25)?`,
+                    correct: idx.toString(),
+                    options: utils.shuffleArray([idx.toString(), d_idx1.toString(), d_idx2.toString(), d_idx3.toString()])
+                };
+            } else if (t === 'rot13') {
+                var lettersR = 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+                var origIdx = Math.floor(Math.random() * lettersR.length);
+                var origChar = lettersR[origIdx];
+                var rotChar = utils.numToLetter(utils.letterToNum(origChar) + 13);
+                var bad1 = utils.numToLetter(utils.letterToNum(origChar) + 12);
+                var bad2 = utils.numToLetter(utils.letterToNum(origChar) + 14);
+                var bad3 = utils.numToLetter(utils.letterToNum(origChar) + 7);
+                q = {
+                    category: 'Fast ROT13 Shift',
+                    prompt: `ROT13 of '${origChar}' (+13 shift) = ?`,
+                    correct: rotChar,
+                    options: utils.shuffleArray([rotChar, bad1, bad2, bad3])
+                };
+            } else {
+                var ruleQuestions = [
+                    {
+                        prompt: 'Playfair Decryption: Letters in the SAME ROW shift which way?',
+                        correct: 'LEFT',
+                        options: ['LEFT', 'RIGHT', 'UP', 'DOWN']
+                    },
+                    {
+                        prompt: 'Playfair Decryption: Letters in the SAME COLUMN shift which way?',
+                        correct: 'UP',
+                        options: ['UP', 'DOWN', 'LEFT', 'RIGHT']
+                    },
+                    {
+                        prompt: 'Playfair Encryption: Letters in the SAME ROW shift which way?',
+                        correct: 'RIGHT',
+                        options: ['RIGHT', 'LEFT', 'DOWN', 'UP']
+                    },
+                    {
+                        prompt: 'Which letter is traditionally combined with I in a 5×5 Playfair grid?',
+                        correct: 'J',
+                        options: ['J', 'Q', 'X', 'Z']
+                    }
+                ];
+                var rq = ruleQuestions[Math.floor(Math.random() * ruleQuestions.length)];
+                q = {
+                    category: 'Cipher Rules Flash',
+                    prompt: rq.prompt,
+                    correct: rq.correct,
+                    options: rq.options
+                };
+            }
+
+            return q;
+        }
+
+        function renderNextSpeedQuestion() {
+            drillState.currentQuestion = generateSpeedDrillQuestion();
+            var catEl = container.querySelector('#speed-drill-category');
+            var promptEl = container.querySelector('#speed-drill-prompt');
+            var optEl = container.querySelector('#speed-drill-options');
+            var fbEl = container.querySelector('#speed-drill-live-feedback');
+
+            if (catEl) catEl.textContent = drillState.currentQuestion.category;
+            if (promptEl) promptEl.textContent = drillState.currentQuestion.prompt;
+            if (fbEl) fbEl.textContent = '';
+
+            if (optEl) {
+                optEl.innerHTML = '';
+                drillState.currentQuestion.options.forEach(function(opt) {
+                    var btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary';
+                    btn.style.minWidth = '80px';
+                    btn.style.fontSize = '1.15rem';
+                    btn.style.fontFamily = 'var(--font-mono)';
+                    btn.style.fontWeight = '700';
+                    btn.style.padding = '0.65rem 1.25rem';
+                    btn.textContent = opt;
+
+                    btn.addEventListener('click', function() {
+                        handleSpeedAnswer(opt, btn);
+                    });
+                    optEl.appendChild(btn);
+                });
+            }
+        }
+
+        function handleSpeedAnswer(selectedOpt, btn) {
+            if (!drillState.active) return;
+            drillState.totalAnswered++;
+
+            var isCorrect = (selectedOpt === drillState.currentQuestion.correct);
+            var scoreEl = container.querySelector('#speed-drill-score');
+            var streakEl = container.querySelector('#speed-drill-streak');
+            var fbEl = container.querySelector('#speed-drill-live-feedback');
+
+            if (isCorrect) {
+                drillState.correctCount++;
+                drillState.streak++;
+                if (drillState.streak > drillState.bestStreak) {
+                    drillState.bestStreak = drillState.streak;
+                }
+
+                // Points: 10 base + streak multiplier
+                var multiplier = (drillState.streak >= 5) ? 2.0 : (drillState.streak >= 3) ? 1.5 : 1.0;
+                var gained = Math.round(10 * multiplier);
+                drillState.score += gained;
+
+                if (fbEl) {
+                    fbEl.style.color = 'var(--success)';
+                    fbEl.textContent = `+${gained} Correct! 🔥`;
+                }
+                btn.style.background = 'var(--success)';
+                btn.style.borderColor = 'var(--success)';
+                btn.style.color = '#fff';
+            } else {
+                drillState.streak = 0;
+                if (fbEl) {
+                    fbEl.style.color = 'var(--danger)';
+                    fbEl.textContent = `❌ Correct was: ${drillState.currentQuestion.correct}`;
+                }
+                btn.style.background = 'var(--danger)';
+                btn.style.borderColor = 'var(--danger)';
+                btn.style.color = '#fff';
+            }
+
+            if (scoreEl) scoreEl.textContent = drillState.score;
+            if (streakEl) streakEl.textContent = drillState.streak + ' 🔥';
+
+            // Next question after a tiny flash
+            setTimeout(function() {
+                if (drillState.active) {
+                    renderNextSpeedQuestion();
+                }
+            }, 320);
+        }
+
+        function startSpeedDrill() {
+            drillState.active = true;
+            drillState.secondsLeft = 60;
+            drillState.score = 0;
+            drillState.streak = 0;
+            drillState.bestStreak = 0;
+            drillState.totalAnswered = 0;
+            drillState.correctCount = 0;
+
+            container.querySelector('#speed-drill-idle').style.display = 'none';
+            container.querySelector('#speed-drill-results').style.display = 'none';
+            container.querySelector('#speed-drill-active').style.display = 'block';
+
+            var timerEl = container.querySelector('#speed-drill-timer');
+            var scoreEl = container.querySelector('#speed-drill-score');
+            var streakEl = container.querySelector('#speed-drill-streak');
+            if (timerEl) {
+                timerEl.textContent = '60s';
+                timerEl.style.color = '#f59e0b';
+            }
+            if (scoreEl) scoreEl.textContent = '0';
+            if (streakEl) streakEl.textContent = '0 🔥';
+
+            renderNextSpeedQuestion();
+
+            clearInterval(drillState.timer);
+            drillState.timer = setInterval(function() {
+                drillState.secondsLeft--;
+                if (timerEl) {
+                    timerEl.textContent = drillState.secondsLeft + 's';
+                    if (drillState.secondsLeft <= 10) {
+                        timerEl.style.color = 'var(--danger)';
+                    }
+                }
+
+                if (drillState.secondsLeft <= 0) {
+                    endSpeedDrill();
+                }
+            }, 1000);
+        }
+
+        function endSpeedDrill() {
+            drillState.active = false;
+            clearInterval(drillState.timer);
+
+            container.querySelector('#speed-drill-active').style.display = 'none';
+            var resEl = container.querySelector('#speed-drill-results');
+            resEl.style.display = 'block';
+
+            var accuracy = (drillState.totalAnswered > 0)
+                ? Math.round((drillState.correctCount / drillState.totalAnswered) * 100)
+                : 100;
+
+            var titleEl = container.querySelector('#speed-drill-final-title');
+            var descEl = container.querySelector('#speed-drill-final-desc');
+            var finalScoreEl = container.querySelector('#speed-drill-final-score');
+            var accEl = container.querySelector('#speed-drill-final-accuracy');
+            var streakEl = container.querySelector('#speed-drill-best-streak');
+
+            if (finalScoreEl) finalScoreEl.textContent = drillState.score;
+            if (accEl) accEl.textContent = accuracy + '%';
+            if (streakEl) streakEl.textContent = drillState.bestStreak;
+
+            if (drillState.score > highScore) {
+                highScore = drillState.score;
+                try {
+                    localStorage.setItem('cryptolab_speed_drill_highscore', highScore.toString());
+                } catch (e) {}
+                if (highscoreEl) highscoreEl.textContent = highScore;
+                if (titleEl) titleEl.textContent = '🏆 NEW HIGH SCORE!';
+                if (descEl) descEl.textContent = `Spectacular speed! You set a personal record of ${drillState.score} points!`;
+            } else {
+                if (titleEl) titleEl.textContent = '⏱️ Drill Completed!';
+                if (descEl) descEl.textContent = `Great effort! You answered ${drillState.correctCount} out of ${drillState.totalAnswered} questions correctly.`;
+            }
+        }
+
+        var btnStart = container.querySelector('#btn-start-speed-drill');
+        if (btnStart) btnStart.addEventListener('click', startSpeedDrill);
+
+        var btnRestart = container.querySelector('#btn-restart-speed-drill');
+        if (btnRestart) btnRestart.addEventListener('click', startSpeedDrill);
+
+        var btnQuit = container.querySelector('#btn-quit-speed-drill');
+        if (btnQuit) btnQuit.addEventListener('click', endSpeedDrill);
     });
 
 })(window.CipherApp);

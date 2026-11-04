@@ -269,26 +269,84 @@ describe('7. Practical Exam Question Generator', () => {
 
         const q10 = exam.generateExamQuestions('all', 'medium', 10);
         assert.equal(q10.length, 10);
+
+        const q15 = exam.generateExamQuestions('all', 'medium', 15);
+        assert.equal(q15.length, 15);
     });
 
-    it('filters questions strictly by cipher when specified', () => {
-        const caesarQuestions = exam.generateExamQuestions('caesar', 'all', 5);
+    it('filters questions strictly by cipher when specified and has at least 15 per category', () => {
+        const caesarQuestions = exam.generateExamQuestions('caesar', 'all', 15);
+        assert.equal(caesarQuestions.length, 15, 'Caesar must have at least 15 questions');
         caesarQuestions.forEach(q => assert.equal(q.cipher, 'caesar'));
 
-        const playfairQuestions = exam.generateExamQuestions('playfair', 'all', 5);
+        const playfairQuestions = exam.generateExamQuestions('playfair', 'all', 15);
+        assert.equal(playfairQuestions.length, 15, 'Playfair must have at least 15 questions');
         playfairQuestions.forEach(q => assert.equal(q.cipher, 'playfair'));
 
-        const monoQuestions = exam.generateExamQuestions('monoalphabetic', 'all', 4);
+        const monoQuestions = exam.generateExamQuestions('monoalphabetic', 'all', 15);
+        assert.equal(monoQuestions.length, 15, 'Monoalphabetic must have at least 15 questions');
         monoQuestions.forEach(q => assert.equal(q.cipher, 'monoalphabetic'));
     });
 
     it('every generated question has valid structure and answer keys', () => {
-        const questions = exam.generateExamQuestions('all', 'hard', 10);
+        const questions = exam.generateExamQuestions('all', 'hard', 15);
         questions.forEach((q, idx) => {
             assert.ok(q.title, `Question ${idx} missing title`);
             assert.ok(q.question, `Question ${idx} missing question prompt`);
             assert.ok(q.correctAnswer !== undefined && q.correctAnswer !== '', `Question ${idx} missing correctAnswer`);
             assert.ok(q.explanation, `Question ${idx} missing solution explanation`);
+            if (q.type === 'choice') {
+                assert.ok(Array.isArray(q.options) && q.options.length >= 2, `Question ${idx} choice options missing`);
+                assert.ok(q.options.includes(q.correctAnswer), `Question ${idx} correctAnswer must be in options`);
+            }
         });
+    });
+});
+
+describe('8. Cryptanalysis Review Mystery Challenges', () => {
+    const exam = global.CipherApp.exam;
+
+    it('solves Challenge 1 (Roman Legion Caesar Mystery: WKH HASHGLWLRQ...)', () => {
+        assert.ok(exam.solveChallenge1(3, 'THE EXPEDITION HAS SUCCEEDED MEET AT THE RIVER'));
+        assert.ok(!exam.solveChallenge1(4, 'THE EXPEDITION HAS SUCCEEDED MEET AT THE RIVER'));
+        assert.ok(!exam.solveChallenge1(3, 'WRONG PLAINTEXT'));
+    });
+
+    it('solves Challenge 2 (Diplomat Cable Playfair Mystery: RM DB YI MT)', () => {
+        assert.ok(exam.solveChallenge2('ARBYBGRL'));
+        assert.ok(exam.solveChallenge2('AR BY BG RL'));
+        assert.ok(!exam.solveChallenge2('INVALID'));
+    });
+
+    it('solves Challenge 3 (Field Commander Full Playfair Decryption: GATLMZCLRQXA)', () => {
+        assert.ok(exam.solveChallenge3('INSTRUMENTS'));
+        assert.ok(exam.solveChallenge3('INSTRUMENTSX'));
+        assert.ok(exam.solveChallenge3('IN ST RU ME NT SX'));
+        assert.ok(!exam.solveChallenge3('RANDOM'));
+    });
+
+    it('solves Challenge 4 (Shadow Agent Atbash Mystery: GSV HVXIVG RH HZUV)', () => {
+        assert.ok(exam.solveChallenge4('THE SECRET IS SAFE'));
+        assert.ok(exam.solveChallenge4('THESECRETISSAFE'));
+        assert.ok(!exam.solveChallenge4('THE WRONG MESSAGE'));
+    });
+});
+
+describe('9. Caesar Wheel Mathematical Decryption Correctness', () => {
+    const utils = global.CipherApp.utils;
+
+    it('verifies clicking inner ciphertext letter correctly decrypts without coordinate inverted logic', () => {
+        // Inner letter A (index 0) with key 3
+        const cipherIdxA = 0;
+        const key = 3;
+        const plainIdxA = utils.mod(cipherIdxA - key, 26);
+        assert.equal(plainIdxA, 23); // X
+        assert.equal(utils.numToLetter(plainIdxA), 'X');
+
+        // Inner letter X (index 23) with key 3
+        const cipherIdxX = 23;
+        const plainIdxX = utils.mod(cipherIdxX - key, 26);
+        assert.equal(plainIdxX, 20); // U (NOT A!)
+        assert.equal(utils.numToLetter(plainIdxX), 'U');
     });
 });

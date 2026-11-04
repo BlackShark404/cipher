@@ -563,6 +563,8 @@
             outerHit.setAttribute('cy', oy);
             outerHit.setAttribute('r', '12');
             outerHit.setAttribute('fill', 'transparent');
+            outerHit.setAttribute('opacity', '0');
+            outerHit.setAttribute('pointer-events', 'all');
             outerHit.setAttribute('cursor', 'pointer');
             outerHit.setAttribute('data-outer-index', i);
             wheelSvg.appendChild(outerHit);
@@ -577,7 +579,6 @@
             innerText.setAttribute('dominant-baseline', 'central');
             innerText.setAttribute('font-size', '12');
             innerText.setAttribute('font-weight', '700');
-            innerText.setAttribute('fill', '#dc2626');
             innerText.setAttribute('font-family', 'monospace');
             innerText.setAttribute('data-inner-index', i);
             innerText.setAttribute('cursor', 'pointer');
@@ -590,6 +591,8 @@
             innerHit.setAttribute('cy', iy);
             innerHit.setAttribute('r', '11');
             innerHit.setAttribute('fill', 'transparent');
+            innerHit.setAttribute('opacity', '0');
+            innerHit.setAttribute('pointer-events', 'all');
             innerHit.setAttribute('cursor', 'pointer');
             innerHit.setAttribute('data-inner-index', i);
             innerGroup.appendChild(innerHit);
@@ -618,35 +621,33 @@
         selectedOuterIndex = -1;
         selectedInnerIndex = -1;
         wheelMappingDisplay.style.display = 'none';
-        // Reset colors
+        // Reset highlights
         var outerTexts = wheelSvg.querySelectorAll('text[data-outer-index]');
         outerTexts.forEach(function(t) {
             t.classList.remove('wheel-highlight-active');
-            t.setAttribute('fill', '#2563eb');
+            t.removeAttribute('fill');
             t.setAttribute('font-size', '13');
         });
         var innerTexts = wheelSvg.querySelectorAll('text[data-inner-index]');
         innerTexts.forEach(function(t) {
             t.classList.remove('wheel-highlight-active');
-            t.setAttribute('fill', '#dc2626');
+            t.removeAttribute('fill');
             t.setAttribute('font-size', '12');
         });
     }
 
     function highlightWheelPair(outerIdx, innerIdx, fromOuter) {
         clearWheelHighlights();
-        // Highlight outer
+        // Highlight outer letter
         var outerText = wheelSvg.querySelector('text[data-outer-index="' + outerIdx + '"]');
         if (outerText) {
             outerText.classList.add('wheel-highlight-active');
-            outerText.setAttribute('fill', '#1d4ed8');
             outerText.setAttribute('font-size', '16');
         }
-        // Highlight inner (need to find the letter that appears at position outerIdx after rotation)
+        // Highlight inner letter
         var innerText = wheelSvg.querySelector('text[data-inner-index="' + innerIdx + '"]');
         if (innerText) {
             innerText.classList.add('wheel-highlight-active');
-            innerText.setAttribute('fill', '#b91c1c');
             innerText.setAttribute('font-size', '15');
         }
 
@@ -663,11 +664,11 @@
                 '</span>';
         } else {
             wheelMappingDisplay.innerHTML =
-                '<span class="highlight-cipher" style="font-size:1.2rem;">' + numToLetter(outerIdx) + '</span>' +
+                '<span class="highlight-cipher" style="font-size:1.2rem;">' + cipherLetter + '</span>' +
                 ' <span style="color:var(--gray-400);">decrypts to</span> ' +
-                '<span class="highlight-plain" style="font-size:1.2rem;">' + numToLetter(innerIdx) + '</span>' +
+                '<span class="highlight-plain" style="font-size:1.2rem;">' + plainLetter + '</span>' +
                 '<br><span style="font-size:0.85rem;color:var(--gray-500);">' +
-                    numToLetter(outerIdx) + '=' + outerIdx + ', (' + outerIdx + ' − ' + currentWheelKey + ' + 26) mod 26 = ' + mod(outerIdx - currentWheelKey, 26) + ' = ' + numToLetter(innerIdx) +
+                    cipherLetter + '=' + innerIdx + ', (' + innerIdx + ' − ' + currentWheelKey + ' + 26) mod 26 = ' + mod(innerIdx - currentWheelKey, 26) + ' = ' + plainLetter +
                 '</span>';
         }
         wheelMappingDisplay.style.display = 'block';
