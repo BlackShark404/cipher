@@ -1,9 +1,8 @@
 /* ===== Monoalphabetic Substitution Cipher Module ===== */
-CipherApp.registerModule('monoalphabetic', function(container) {
+(function(app) {
     'use strict';
 
-    var utils = CipherApp.utils;
-    var progress = CipherApp.progress;
+    var utils = app.utils;
     var SECTION = 'monoalphabetic';
     var ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var EXAMPLE_KEY = 'QWERTYUIOPASDFGHJKLZXCVBNM';
@@ -11,11 +10,6 @@ CipherApp.registerModule('monoalphabetic', function(container) {
     // ---- Pre-loaded frequency analysis example ----
     var FA_PLAIN = 'THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG AND THE BRAVE KNIGHT DEFENDS THE ANCIENT CASTLE FROM THE SHADOW';
     var FA_KEY = 'XYMHTBZWCSADEJOGFVNRUPQKLG'; // a fixed random key for the pre-loaded example
-    // Generate it deterministically so we always get the same ciphertext
-    // Actually let's compute the key properly - ensure all 26 unique letters
-    // Use: A->X, B->Y, C->M, D->H, E->T, F->B, G->Z, H->W, I->C, J->S, K->A, L->D,
-    //      M->E, N->J, O->G, P->F, Q->V, R->N, S->R, T->U, U->P, V->Q, W->K, X->L, Y->I, Z->O
-    // Verify uniqueness: X Y M H T B Z W C S A D E J G F V N R U P Q K L I O — 26 unique ✓
 
     function monoEncrypt(plain, key) {
         var cleaned = utils.cleanText(plain);
@@ -54,10 +48,20 @@ CipherApp.registerModule('monoalphabetic', function(container) {
 
     var FA_CIPHER = monoEncrypt(FA_PLAIN, FA_KEY);
 
+    app.monoalphabetic = {
+        encrypt: monoEncrypt,
+        decrypt: monoDecrypt,
+        encryptPreserveSpaces: monoEncryptPreserveSpaces,
+        EXAMPLE_KEY: EXAMPLE_KEY
+    };
+
     // ---- Exercise 5: longer ciphertext for frequency analysis ----
     var EX5_PLAIN = 'SECRETS HIDDEN IN THE SHADOWS ARE OFTEN THE MOST DANGEROUS ONES TO REVEAL';
     var EX5_KEY = FA_KEY; // reuse the same key
     var EX5_CIPHER = monoEncrypt(EX5_PLAIN, EX5_KEY);
+
+    app.registerModule('monoalphabetic', function(container) {
+        var progress = app.progress;
 
     // ========================================
     // BUILD HTML
@@ -1212,4 +1216,5 @@ CipherApp.registerModule('monoalphabetic', function(container) {
 
     // Initial validation and display
     updateAlphabetDisplay();
-});
+    });
+})(window.CipherApp);

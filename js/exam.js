@@ -224,23 +224,8 @@
     // =========================================================================
     // MODULE 2: PRACTICAL EXAM SIMULATION (section-exam)
     // =========================================================================
-    app.registerModule('exam', function(container) {
-        var examState = {
-            isActive: false,
-            timerInterval: null,
-            timeRemaining: 0,
-            totalSeconds: 0,
-            cipherFilter: 'all',
-            difficulty: 'medium',
-            questionCount: 10,
-            currentIndex: 0,
-            questions: [],
-            userAnswers: [],
-            results: null
-        };
-
-        // Bank of questions generator
-        function generateExamQuestions(cipherFilter, difficulty, count) {
+    // Bank of questions generator
+    function generateExamQuestions(cipherFilter, difficulty, count) {
             var pool = [];
             var ciphers = (cipherFilter === 'all') ? ['caesar', 'monoalphabetic', 'playfair'] : [cipherFilter];
             
@@ -442,7 +427,26 @@
             return shuffled.slice(0, Math.min(count, shuffled.length));
         }
 
-        // Render configuration screen
+        app.exam = {
+            generateExamQuestions: generateExamQuestions
+        };
+
+        app.registerModule('exam', function(container) {
+            var examState = {
+                isActive: false,
+                timerInterval: null,
+                timeRemaining: 0,
+                totalSeconds: 0,
+                cipherFilter: 'all',
+                difficulty: 'medium',
+                questionCount: 10,
+                currentIndex: 0,
+                questions: [],
+                userAnswers: [],
+                results: null
+            };
+
+            // Render configuration screen
         function renderExamConfig() {
             var html = `
             <div class="section-content">

@@ -1,9 +1,8 @@
 /* ===== Caesar Cipher Module ===== */
-CipherApp.registerModule('caesar', function(container) {
+(function(app) {
     'use strict';
 
-    var utils = CipherApp.utils;
-    var progress = CipherApp.progress;
+    var utils = app.utils;
     var mod = utils.mod;
     var letterToNum = utils.letterToNum;
     var numToLetter = utils.numToLetter;
@@ -77,6 +76,17 @@ CipherApp.registerModule('caesar', function(container) {
         }
         return score;
     }
+
+    app.caesar = {
+        encryptLetter: caesarEncryptLetter,
+        decryptLetter: caesarDecryptLetter,
+        encrypt: caesarEncrypt,
+        decrypt: caesarDecrypt,
+        scoreText: scoreText
+    };
+
+    app.registerModule('caesar', function(container) {
+        var progress = app.progress;
 
     // ==================== BUILD HTML ====================
 
@@ -1123,4 +1133,5 @@ CipherApp.registerModule('caesar', function(container) {
         }
     }
 
-});
+    });
+})(window.CipherApp);

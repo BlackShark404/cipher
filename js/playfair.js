@@ -1,9 +1,8 @@
 /* ===== Playfair Cipher Module ===== */
-CipherApp.registerModule('playfair', function(container) {
+(function(app) {
     'use strict';
 
-    var utils = CipherApp.utils;
-    var progress = CipherApp.progress;
+    var utils = app.utils;
     var SECTION_ID = 'playfair';
 
     // ============================
@@ -134,6 +133,33 @@ CipherApp.registerModule('playfair', function(container) {
             outPos2: { row: r2, col: c2 }
         };
     }
+
+    CipherApp.playfair = {
+        buildMatrix: buildMatrix,
+        prepareText: prepareText,
+        findPosition: findPosition,
+        getRule: getRule,
+        encryptDigraph: encryptDigraph,
+        decryptDigraph: decryptDigraph,
+        encrypt: function(text, keyword) {
+            var m = buildMatrix(keyword).matrix;
+            var prep = prepareText(text);
+            return prep.digraphs.map(function(d) { return encryptDigraph(m, d).output; }).join('');
+        },
+        decrypt: function(text, keyword) {
+            var m = buildMatrix(keyword).matrix;
+            var clean = utils.cleanText(text).replace(/J/g, 'I');
+            if (clean.length % 2 !== 0) clean += 'X';
+            var res = '';
+            for (var i = 0; i < clean.length; i += 2) {
+                res += decryptDigraph(m, clean.slice(i, i + 2)).output;
+            }
+            return res;
+        }
+    };
+
+    app.registerModule('playfair', function(container) {
+        var progress = app.progress;
 
     /** Render rule badge HTML */
     function ruleBadge(rule) {
@@ -957,7 +983,7 @@ CipherApp.registerModule('playfair', function(container) {
         2: function() { var el = container.querySelector('#pf-ex2-input'); if (el) el.value = 'BA LX LO ON'; },
         3: function() { var el = container.querySelector('#pf-ex3-input'); if (el) el.value = 'RM'; },
         4: function() { var el = container.querySelector('#pf-ex4-input'); if (el) el.value = 'BP'; },
-        5: function() { var el = container.querySelector('#pf-ex5-input'); if (el) el.value = 'GATLMZCLRQTX'; }
+        5: function() { var el = container.querySelector('#pf-ex5-input'); if (el) el.value = 'GATLMZCLRQXA'; }
     };
     for (var ei = 1; ei <= 5; ei++) {
         if (progress.isComplete(SECTION_ID, 'playfair-exercise-' + ei)) {
@@ -971,4 +997,5 @@ CipherApp.registerModule('playfair', function(container) {
 
     // ---- Initial progress update ----
     updateSectionProgress();
-});
+    });
+})(window.CipherApp);
