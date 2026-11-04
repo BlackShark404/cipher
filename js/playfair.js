@@ -455,7 +455,13 @@ CipherApp.registerModule('playfair', function(container) {
         var pct = progress.getProgress(SECTION_ID);
         var fill = container.querySelector('#pf-progress-fill');
         var text = container.querySelector('#pf-progress-text');
-        if (fill) fill.style.width = pct + '%';
+        if (fill) {
+            fill.style.width = pct + '%';
+            if (utils.getProgressColor) {
+                fill.style.backgroundColor = utils.getProgressColor(pct);
+                fill.style.boxShadow = '0 0 8px ' + utils.getProgressGlow(pct);
+            }
+        }
         if (text) text.textContent = pct + '%';
     }
 

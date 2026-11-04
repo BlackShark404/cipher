@@ -2,33 +2,33 @@
 window.CipherApp = window.CipherApp || {};
 var CipherApp = window.CipherApp;
 
-(function(app) {
+(function (app) {
     'use strict';
 
     // ---- Utility Functions ----
     app.utils = {
         // Proper modulo that handles negative numbers
-        mod: function(n, m) {
+        mod: function (n, m) {
             return ((n % m) + m) % m;
         },
 
         // Convert letter to number: A=0, B=1, ..., Z=25
-        letterToNum: function(letter) {
+        letterToNum: function (letter) {
             return letter.toUpperCase().charCodeAt(0) - 65;
         },
 
         // Convert number to letter: 0=A, 1=B, ..., 25=Z
-        numToLetter: function(num) {
+        numToLetter: function (num) {
             return String.fromCharCode(app.utils.mod(num, 26) + 65);
         },
 
         // Clean text: uppercase, letters only
-        cleanText: function(text) {
+        cleanText: function (text) {
             return text.toUpperCase().replace(/[^A-Z]/g, '');
         },
 
         // Fisher-Yates shuffle (returns new array)
-        shuffleArray: function(arr) {
+        shuffleArray: function (arr) {
             var a = arr.slice();
             for (var i = a.length - 1; i > 0; i--) {
                 var j = Math.floor(Math.random() * (i + 1));
@@ -47,16 +47,16 @@ var CipherApp = window.CipherApp;
         },
 
         // Common English bigrams
-        commonBigrams: ['TH','HE','IN','ER','AN','RE','ON','AT','EN','ND',
-                        'TI','ES','OR','TE','OF','ED','IS','IT','AL','AR'],
+        commonBigrams: ['TH', 'HE', 'IN', 'ER', 'AN', 'RE', 'ON', 'AT', 'EN', 'ND',
+            'TI', 'ES', 'OR', 'TE', 'OF', 'ED', 'IS', 'IT', 'AL', 'AR'],
 
         // Generate random ID
-        generateId: function() {
+        generateId: function () {
             return 'id_' + Math.random().toString(36).substr(2, 9);
         },
 
         // Animate element with a CSS class
-        animateElement: function(el, className) {
+        animateElement: function (el, className) {
             el.classList.remove(className);
             void el.offsetWidth; // trigger reflow
             el.classList.add(className);
@@ -70,12 +70,12 @@ var CipherApp = window.CipherApp;
         alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
 
         // Random integer between min and max inclusive
-        randInt: function(min, max) {
+        randInt: function (min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         },
 
         // Pick random element from array
-        randPick: function(arr) {
+        randPick: function (arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         },
 
@@ -105,14 +105,14 @@ var CipherApp = window.CipherApp;
         ],
 
         // Escape HTML
-        escapeHtml: function(str) {
+        escapeHtml: function (str) {
             var div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
         },
 
         // Show Toast Notification
-        showToast: function(message, type) {
+        showToast: function (message, type) {
             var container = document.getElementById('toast-container');
             if (!container) return;
             var toast = document.createElement('div');
@@ -120,22 +120,22 @@ var CipherApp = window.CipherApp;
             var icon = type === 'success' ? '✓' : (type === 'danger' ? '⚠' : 'ℹ');
             toast.innerHTML = '<span style="font-size:1.1rem;font-weight:700;">' + icon + '</span> <span>' + message + '</span>';
             container.appendChild(toast);
-            setTimeout(function() {
+            setTimeout(function () {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(15px) scale(0.95)';
-                setTimeout(function() {
+                setTimeout(function () {
                     if (toast.parentNode) toast.parentNode.removeChild(toast);
                 }, 300);
             }, 3000);
         },
 
         // Copy text to clipboard
-        copyToClipboard: function(text) {
+        copyToClipboard: function (text) {
             if (!text) return;
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(function() {
+                navigator.clipboard.writeText(text).then(function () {
                     app.utils.showToast('Copied to clipboard!', 'success');
-                }).catch(function() {
+                }).catch(function () {
                     fallbackCopy(text);
                 });
             } else {
@@ -151,18 +151,54 @@ var CipherApp = window.CipherApp;
                 try {
                     document.execCommand('copy');
                     app.utils.showToast('Copied to clipboard!', 'success');
-                } catch(e) {
+                } catch (e) {
                     app.utils.showToast('Unable to copy', 'danger');
                 }
                 document.body.removeChild(ta);
             }
         },
 
+        // Get specific color based on progress percentage
+        getProgressColor: function (pct) {
+            if (pct >= 100) return 'var(--success)';
+            if (pct >= 70) return 'var(--info)';
+            if (pct >= 35) return 'var(--primary)';
+            if (pct > 0) return 'var(--warning)';
+            return 'var(--border-strong)';
+        },
+
+        // Get matching subtle glow for progress
+        getProgressGlow: function (pct) {
+            if (pct >= 100) return 'var(--success-glow)';
+            if (pct >= 70) return 'rgba(14, 165, 233, 0.35)';
+            if (pct >= 35) return 'var(--primary-glow)';
+            if (pct > 0) return 'var(--warning-glow)';
+            return 'none';
+        },
+
+        // Get specific color based on progress percentage
+        getProgressColor: function(pct) {
+            if (pct >= 100) return 'var(--success)';
+            if (pct >= 70) return 'var(--info)';
+            if (pct >= 35) return 'var(--primary)';
+            if (pct > 0) return 'var(--warning)';
+            return 'var(--border-strong)';
+        },
+
+        // Get matching subtle glow for progress
+        getProgressGlow: function(pct) {
+            if (pct >= 100) return 'var(--success-glow)';
+            if (pct >= 70) return 'rgba(14, 165, 233, 0.35)';
+            if (pct >= 35) return 'var(--primary-glow)';
+            if (pct > 0) return 'var(--warning-glow)';
+            return 'none';
+        },
+
         // Create an element with attributes and children
-        createElement: function(tag, attrs, children) {
+        createElement: function (tag, attrs, children) {
             var el = document.createElement(tag);
             if (attrs) {
-                Object.keys(attrs).forEach(function(key) {
+                Object.keys(attrs).forEach(function (key) {
                     if (key === 'className') el.className = attrs[key];
                     else if (key === 'innerHTML') el.innerHTML = attrs[key];
                     else if (key === 'textContent') el.textContent = attrs[key];
@@ -171,7 +207,7 @@ var CipherApp = window.CipherApp;
                 });
             }
             if (children) {
-                children.forEach(function(child) {
+                children.forEach(function (child) {
                     if (typeof child === 'string') el.appendChild(document.createTextNode(child));
                     else if (child) el.appendChild(child);
                 });
@@ -181,7 +217,7 @@ var CipherApp = window.CipherApp;
     };
 
     // ---- Progress Tracking ----
-    app.progress = (function() {
+    app.progress = (function () {
         var STORAGE_KEY = 'cryptolab_progress';
         var data = {};
 
@@ -190,48 +226,48 @@ var CipherApp = window.CipherApp;
             try {
                 var stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) data = JSON.parse(stored);
-            } catch(e) { data = {}; }
+            } catch (e) { data = {}; }
         }
 
         // Save to localStorage
         function save() {
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
         }
 
         load();
 
         return {
-            complete: function(sectionId, taskId) {
+            complete: function (sectionId, taskId) {
                 if (!data[sectionId]) data[sectionId] = {};
                 data[sectionId][taskId] = true;
                 save();
                 if (app.updateProgress) app.updateProgress();
             },
 
-            isComplete: function(sectionId, taskId) {
+            isComplete: function (sectionId, taskId) {
                 return !!(data[sectionId] && data[sectionId][taskId]);
             },
 
-            getProgress: function(sectionId) {
+            getProgress: function (sectionId) {
                 var tasks = app.progress.getSectionTasks(sectionId);
                 if (!tasks || tasks.length === 0) return 0;
-                var completed = tasks.filter(function(t) {
+                var completed = tasks.filter(function (t) {
                     return app.progress.isComplete(sectionId, t);
                 }).length;
                 return Math.round((completed / tasks.length) * 100);
             },
 
-            getSectionTasks: function(sectionId) {
+            getSectionTasks: function (sectionId) {
                 return app._sectionTasks[sectionId] || [];
             },
 
-            reset: function() {
+            reset: function () {
                 data = {};
                 save();
                 if (app.updateProgress) app.updateProgress();
             },
 
-            getData: function() { return JSON.parse(JSON.stringify(data)); }
+            getData: function () { return JSON.parse(JSON.stringify(data)); }
         };
     })();
 
@@ -258,7 +294,7 @@ var CipherApp = window.CipherApp;
     // ---- Module Registry ----
     app.modules = {};
 
-    app.registerModule = function(name, initFn) {
+    app.registerModule = function (name, initFn) {
         app.modules[name] = initFn;
     };
 

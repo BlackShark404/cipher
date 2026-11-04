@@ -632,7 +632,7 @@
 
                 <!-- Progress Bar -->
                 <div class="progress-bar" style="margin-bottom: 1.5rem; height: 6px;">
-                    <div class="progress-fill" style="width: ${progressPct}%;"></div>
+                    <div class="progress-fill" style="width: ${progressPct}%; background-color: ${utils.getProgressColor ? utils.getProgressColor(progressPct) : 'var(--primary)'}; box-shadow: 0 0 8px ${utils.getProgressGlow ? utils.getProgressGlow(progressPct) : 'var(--primary-glow)'};"></div>
                 </div>
 
                 <!-- Question Card -->

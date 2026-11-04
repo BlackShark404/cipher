@@ -88,7 +88,11 @@
             }
             // Home cards
             var homeBar = document.getElementById('home-prog-' + (sec === 'monoalphabetic' ? 'mono' : sec));
-            if (homeBar) homeBar.style.width = pct + '%';
+            if (homeBar) {
+                homeBar.style.width = pct + '%';
+                homeBar.style.backgroundColor = utils.getProgressColor(pct);
+                homeBar.style.boxShadow = '0 0 8px ' + utils.getProgressGlow(pct);
+            }
         });
 
         // Overall progress
@@ -102,7 +106,11 @@
         var text = document.getElementById('overall-progress-text');
         var rank = document.getElementById('rank-title');
         
-        if (fill) fill.style.width = overall + '%';
+        if (fill) {
+            fill.style.width = overall + '%';
+            fill.style.backgroundColor = utils.getProgressColor(overall);
+            fill.style.boxShadow = '0 0 10px ' + utils.getProgressGlow(overall);
+        }
         if (text) text.textContent = overall + '%';
 
         if (rank) {
