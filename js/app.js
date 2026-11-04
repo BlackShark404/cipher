@@ -17,7 +17,9 @@
         review: 'Cheat Sheets, Cribs & Fast Reference'
     };
 
-    function navigateTo(sectionId) {
+    function navigateTo(sectionId, skipHash) {
+        if (!sectionTitles[sectionId]) sectionId = 'home';
+
         // Update nav items
         document.querySelectorAll('.nav-item').forEach(function(item) {
             item.classList.toggle('active', item.dataset.section === sectionId);
@@ -29,6 +31,19 @@
         });
 
         currentSection = sectionId;
+
+        // Persist active section
+        if (app.storage) {
+            app.storage.set('last_section', sectionId);
+        }
+
+        // Sync URL Hash (without duplicate reload)
+        if (!skipHash) {
+            var targetHash = sectionId === 'home' ? '' : '#' + sectionId;
+            if (window.location.hash !== targetHash) {
+                history.replaceState(null, '', targetHash || window.location.pathname);
+            }
+        }
 
         // Update topbar breadcrumbs
         var breadcrumb = document.getElementById('top-breadcrumb');
@@ -214,11 +229,16 @@
         var resetBtn = document.getElementById('sidebar-reset-btn');
         if (resetBtn) {
             resetBtn.addEventListener('click', function() {
-                if (confirm('Reset all cryptography progress across all modules?')) {
+                if (confirm('Reset all cryptography progress, saved workbench drafts, and exam history across all modules?')) {
+                    if (app.storage && app.storage.clearAll) app.storage.clearAll();
                     app.progress.reset();
                     if (app.utils && app.utils.showToast) {
-                        app.utils.showToast('Progress has been reset.', 'info');
+                        app.utils.showToast('All progress and saved data have been reset.', 'info');
                     }
+                    setTimeout(function() {
+                        window.location.hash = '';
+                        window.location.reload();
+                    }, 400);
                 }
             });
         }
@@ -266,6 +286,27 @@
                 app.utils.copyToClipboard(resBox.innerText);
             }
         });
+
+        // Listen for browser Back/Forward navigation
+        window.addEventListener('hashchange', function() {
+            var hash = (window.location.hash || '').replace('#', '').toLowerCase();
+            if (hash && sectionTitles[hash] && hash !== currentSection) {
+                navigateTo(hash, true);
+            } else if (!hash && currentSection !== 'home') {
+                navigateTo('home', true);
+            }
+        });
+
+        // Restore Session (URL Hash or Last Visited Section)
+        var initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
+        if (initialHash && sectionTitles[initialHash]) {
+            navigateTo(initialHash, true);
+        } else {
+            var savedSec = app.storage ? app.storage.get('last_section', 'home') : 'home';
+            if (savedSec && sectionTitles[savedSec] && savedSec !== 'home') {
+                navigateTo(savedSec, true);
+            }
+        }
 
         // Init Sandbox
         initSandbox();

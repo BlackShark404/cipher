@@ -603,13 +603,13 @@ body::before {
     line-height: 1.25;
     margin-bottom: 0.85rem;
     color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: initial !important;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 [data-theme="light"] .hero-banner h1 {
     color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: initial !important;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
@@ -715,6 +715,16 @@ body::before {
 .card-header[style*="gray-700"] h3,
 .card-header[style*="gray-600"] h3 {
     color: #ffffff !important;
+}
+
+[data-theme="light"] .card-header:not([style*="var(--caesar"]):not([style*="var(--mono"]):not([style*="var(--playfair"]):not([style*="var(--primary"]):not([style*="var(--danger"]):not([style*="linear-gradient"]) {
+    background: #f1f5f9 !important;
+    border-bottom: 1px solid var(--border-medium) !important;
+}
+
+[data-theme="light"] .card-header:not([style*="var(--caesar"]):not([style*="var(--mono"]):not([style*="var(--playfair"]):not([style*="var(--primary"]):not([style*="var(--danger"]):not([style*="linear-gradient"]) h3 {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
 }
 
 .card-body {

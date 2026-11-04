@@ -542,10 +542,18 @@ CipherApp.registerModule('playfair', function(container) {
         });
 
         progress.complete(SECTION_ID, 'playfair-matrix');
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_playfair_key', keyword);
+        }
         updateSectionProgress();
     }
 
     container.querySelector('#btn-gen-matrix').addEventListener('click', generateMatrixUI);
+    // Restore saved keyword
+    var savedPfKey = (utils.storage && utils.storage.get) ? utils.storage.get('draft_playfair_key', 'MONARCHY') : 'MONARCHY';
+    var kwInput = container.querySelector('#pf-matrix-keyword');
+    if (kwInput && savedPfKey) kwInput.value = savedPfKey;
+
     // Auto-generate on load
     setTimeout(generateMatrixUI, 300);
 
@@ -944,10 +952,20 @@ CipherApp.registerModule('playfair', function(container) {
     });
 
     // ---- Restore exercise completion states ----
+    var pfAnswers = {
+        1: function() { var el = container.querySelector('#pf-ex1-input'); if (el) el.value = 'KEYWO'; },
+        2: function() { var el = container.querySelector('#pf-ex2-input'); if (el) el.value = 'BA LX LO ON'; },
+        3: function() { var el = container.querySelector('#pf-ex3-input'); if (el) el.value = 'RM'; },
+        4: function() { var el = container.querySelector('#pf-ex4-input'); if (el) el.value = 'BP'; },
+        5: function() { var el = container.querySelector('#pf-ex5-input'); if (el) el.value = 'GATLMZCLRQTX'; }
+    };
     for (var ei = 1; ei <= 5; ei++) {
         if (progress.isComplete(SECTION_ID, 'playfair-exercise-' + ei)) {
+            if (pfAnswers[ei]) pfAnswers[ei]();
             var exBox = container.querySelector('#pf-ex' + ei);
+            var exBtn = container.querySelector('#btn-ex' + ei + '-check');
             if (exBox) exBox.classList.add('correct');
+            if (exBtn) exBtn.click();
         }
     }
 

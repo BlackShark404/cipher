@@ -216,6 +216,43 @@ var CipherApp = window.CipherApp;
         }
     };
 
+    // ---- Unified Storage Manager ----
+    app.storage = {
+        get: function (key, defaultVal) {
+            try {
+                var item = localStorage.getItem('cryptolab_' + key);
+                return item !== null ? JSON.parse(item) : defaultVal;
+            } catch (e) {
+                return defaultVal;
+            }
+        },
+        set: function (key, val) {
+            try {
+                localStorage.setItem('cryptolab_' + key, JSON.stringify(val));
+            } catch (e) { }
+        },
+        remove: function (key) {
+            try {
+                localStorage.removeItem('cryptolab_' + key);
+            } catch (e) { }
+        },
+        clearAll: function () {
+            try {
+                var toRemove = [];
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.indexOf('cryptolab_') === 0) {
+                        toRemove.push(k);
+                    }
+                }
+                toRemove.forEach(function (k) {
+                    localStorage.removeItem(k);
+                });
+            } catch (e) { }
+        }
+    };
+    app.utils.storage = app.storage;
+
     // ---- Progress Tracking ----
     app.progress = (function () {
         var STORAGE_KEY = 'cryptolab_progress';
@@ -264,6 +301,7 @@ var CipherApp = window.CipherApp;
             reset: function () {
                 data = {};
                 save();
+                if (app.storage && app.storage.clearAll) app.storage.clearAll();
                 if (app.updateProgress) app.updateProgress();
             },
 

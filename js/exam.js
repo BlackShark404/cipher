@@ -514,9 +514,84 @@
                         </div>
                     </div>
                 </div>
+
+                ${(function() {
+                    var history = (utils.storage && utils.storage.get) ? utils.storage.get('exam_history', []) : [];
+                    if (!history || history.length === 0) return '';
+
+                    var bestPct = 0;
+                    var bestGrade = 'F';
+                    history.forEach(function(h) {
+                        if (h.pct > bestPct) {
+                            bestPct = h.pct;
+                            bestGrade = h.grade;
+                        }
+                    });
+
+                    var bestColor = bestPct >= 80 ? 'var(--success)' : (bestPct >= 60 ? 'var(--warning)' : 'var(--danger)');
+
+                    return `
+                    <div class="card" style="margin-top: 1.5rem;" id="exam-history-card">
+                        <div class="card-header" style="background: var(--bg-surface-elevated); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <h3>📊 Past Exam Performance &amp; Records</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span class="badge" style="background: ${bestColor}; font-weight: 700;">Personal Best: ${bestPct}% (Grade ${bestGrade})</span>
+                                <button class="btn btn-secondary btn-sm" id="btn-clear-exam-history" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">🗑️ Clear Records</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="styled-table" style="font-size: 0.88rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>Date &amp; Time</th>
+                                            <th>Cipher Scope</th>
+                                            <th>Difficulty</th>
+                                            <th>Score</th>
+                                            <th>Percentage</th>
+                                            <th>Grade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${history.map(function(item) {
+                                            var badgeCls = item.grade === 'A' ? 'badge-success' : (item.grade === 'B' ? 'badge-info' : (item.grade === 'C' ? 'badge-warning' : 'badge-danger'));
+                                            var cipherLabel = item.cipher === 'all' ? 'All Ciphers' : (item.cipher === 'caesar' ? 'Caesar' : (item.cipher === 'monoalphabetic' ? 'Monoalphabetic' : 'Playfair'));
+                                            return `
+                                            <tr>
+                                                <td style="color: var(--text-secondary);">${item.date || 'Recent'}</td>
+                                                <td><strong>${cipherLabel}</strong></td>
+                                                <td style="text-transform: capitalize;">${item.difficulty}</td>
+                                                <td class="mono">${item.score} / ${item.total}</td>
+                                                <td class="mono font-bold">${item.pct}%</td>
+                                                <td><span class="badge ${badgeCls}">${item.grade}</span></td>
+                                            </tr>`;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>`;
+                })()}
+
             </div>`;
 
             container.innerHTML = html;
+
+            // Clear history button
+            var clearBtn = container.querySelector('#btn-clear-exam-history');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    if (confirm('Clear your past exam performance history?')) {
+                        if (utils.storage && utils.storage.remove) {
+                            utils.storage.remove('exam_history');
+                        }
+                        renderExamConfig();
+                        if (utils.showToast) utils.showToast('Exam history cleared.', 'info');
+                    }
+                });
+            }
 
             // Difficulty buttons
             container.querySelectorAll('#exam-difficulty-btns button').forEach(function(btn) {
@@ -796,6 +871,23 @@
             else if (scorePct >= 80) { grade = 'B'; gradeColor = 'var(--info)'; }
             else if (scorePct >= 70) { grade = 'C'; gradeColor = 'var(--warning)'; }
             else if (scorePct >= 60) { grade = 'D'; gradeColor = 'var(--warning-dark)'; }
+
+            // Save attempt to exam history
+            if (utils.storage && utils.storage.get && utils.storage.set) {
+                var history = utils.storage.get('exam_history', []);
+                var newAttempt = {
+                    date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                    score: Number(earnedPoints.toFixed(1)),
+                    total: totalPossible,
+                    pct: scorePct,
+                    grade: grade,
+                    difficulty: examState.difficulty,
+                    cipher: examState.cipherFilter
+                };
+                history.unshift(newAttempt);
+                if (history.length > 15) history = history.slice(0, 15);
+                utils.storage.set('exam_history', history);
+            }
 
             var html = `
             <div class="section-content">

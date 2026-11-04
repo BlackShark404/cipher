@@ -430,7 +430,8 @@ CipherApp.registerModule('caesar', function(container) {
     var wheelMappingDisplay = container.querySelector('#wheel-mapping-display');
     var wheelKeyMinus = container.querySelector('#wheel-key-minus');
     var wheelKeyPlus = container.querySelector('#wheel-key-plus');
-    var currentWheelKey = 3;
+    var savedWheelKey = (utils.storage && utils.storage.get) ? utils.storage.get('draft_caesar_key', 3) : 3;
+    var currentWheelKey = (typeof savedWheelKey === 'number' && !isNaN(savedWheelKey)) ? savedWheelKey : 3;
     var selectedOuterIndex = -1;
     var selectedInnerIndex = -1;
 
@@ -665,6 +666,9 @@ CipherApp.registerModule('caesar', function(container) {
 
     function setWheelKey(k) {
         currentWheelKey = mod(k, 26);
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_caesar_key', currentWheelKey);
+        }
         updateWheelRotation();
         progress.complete('caesar', 'caesar-wheel');
     }
@@ -1095,5 +1099,28 @@ CipherApp.registerModule('caesar', function(container) {
                 'E(4)+3=7(H), B(1)+3=4(E), I(8)+3=11(L), I(8)+3=11(L), L(11)+3=14(O) = HELLO ✓</span>'
         };
     });
+
+    // Restore exercise completion states
+    var caesarAnswers = {
+        1: function() { var el = container.querySelector('#ex1-answer'); if (el) el.value = 'KHOOR'; },
+        2: function() { var el = container.querySelector('#ex2-answer'); if (el) el.value = 'THINK'; },
+        3: function() { var el = container.querySelector('#ex3-answer'); if (el) el.value = '3'; },
+        4: function() { var el = container.querySelector('#ex4-answer'); if (el) el.value = '3'; },
+        5: function() {
+            var t = container.querySelector('#ex5-answer-text');
+            var k = container.querySelector('#ex5-answer-key');
+            if (t) t.value = 'HELLO';
+            if (k) k.value = '23';
+        }
+    };
+    for (var ce = 1; ce <= 5; ce++) {
+        if (progress.isComplete('caesar', 'caesar-exercise-' + ce)) {
+            if (caesarAnswers[ce]) caesarAnswers[ce]();
+            var exBox = container.querySelector('#exercise-' + ce + '-box');
+            var exCheck = container.querySelector('#ex' + ce + '-check');
+            if (exBox) exBox.classList.add('correct');
+            if (exCheck) exCheck.click();
+        }
+    }
 
 });

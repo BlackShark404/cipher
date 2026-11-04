@@ -485,10 +485,17 @@ CipherApp.registerModule('monoalphabetic', function(container) {
     });
 
     // ---- ALPHABET BUILDER STATE ----
-    var cipherAlpha = ALPHA.split('');
+    var savedAlphaKey = (utils.storage && utils.storage.get) ? utils.storage.get('draft_mono_key', null) : null;
+    var cipherAlpha = (savedAlphaKey && savedAlphaKey.length === 26) ? savedAlphaKey.split('') : ALPHA.split('');
 
     function getCurrentKey() {
         return cipherAlpha.join('');
+    }
+
+    function saveAlphabetDraft() {
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_mono_key', getCurrentKey());
+        }
     }
 
     function updateAlphabetDisplay() {
@@ -552,6 +559,7 @@ CipherApp.registerModule('monoalphabetic', function(container) {
             progress.complete(SECTION, 'mono-alphabet');
         }
 
+        saveAlphabetDraft();
         return !hasDuplicates;
     }
 
@@ -717,6 +725,9 @@ CipherApp.registerModule('monoalphabetic', function(container) {
 
     container.querySelector('#mono-freq-load-example').addEventListener('click', function() {
         container.querySelector('#mono-freq-input').value = FA_CIPHER;
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_mono_ciphertext', FA_CIPHER);
+        }
     });
 
     container.querySelector('#mono-freq-analyze-btn').addEventListener('click', function() {
@@ -725,6 +736,9 @@ CipherApp.registerModule('monoalphabetic', function(container) {
         if (cleaned.length < 2) {
             alert('Please enter some ciphertext to analyze (at least 2 letters).');
             return;
+        }
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_mono_ciphertext', text);
         }
         performFrequencyAnalysis(cleaned);
         container.querySelector('#mono-freq-results').style.display = 'block';
@@ -869,6 +883,10 @@ CipherApp.registerModule('monoalphabetic', function(container) {
                     delete freqMappings[cipherLetter];
                 }
 
+                if (utils.storage && utils.storage.set) {
+                    utils.storage.set('draft_mono_freq', freqMappings);
+                }
+
                 validateFreqMappings();
                 updatePartialDecrypt();
                 checkFreqProgress();
@@ -991,6 +1009,10 @@ CipherApp.registerModule('monoalphabetic', function(container) {
             inp.value = freqMappings[cipher] || '';
         });
 
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_mono_freq', freqMappings);
+        }
+
         validateFreqMappings();
         updatePartialDecrypt();
         checkFreqProgress();
@@ -999,6 +1021,9 @@ CipherApp.registerModule('monoalphabetic', function(container) {
     // Clear mappings
     container.querySelector('#mono-freq-clear-mappings').addEventListener('click', function() {
         freqMappings = {};
+        if (utils.storage && utils.storage.remove) {
+            utils.storage.remove('draft_mono_freq');
+        }
         container.querySelectorAll('.mono-freq-map-input').forEach(function(inp) {
             inp.value = '';
             inp.style.borderColor = 'var(--plain-color)';
@@ -1084,6 +1109,14 @@ CipherApp.registerModule('monoalphabetic', function(container) {
                 utils.animateElement(feedbackDiv, 'fade-in');
             });
         }
+
+        // Restore exercise completion state
+        if (progress.isComplete(SECTION, 'mono-exercise-' + num)) {
+            if (inputEl) inputEl.value = answer;
+            box.classList.add('correct');
+            feedbackDiv.className = 'exercise-feedback show correct-feedback';
+            feedbackDiv.innerHTML = successMsg();
+        }
     }
 
     // Exercise 5: Frequency analysis challenge
@@ -1139,6 +1172,46 @@ CipherApp.registerModule('monoalphabetic', function(container) {
         utils.animateElement(feedbackDiv, 'fade-in');
     });
 
-    // Initial validation
-    validateAlphabet();
+    // Restore Exercise 5 completion state
+    if (progress.isComplete(SECTION, 'mono-exercise-5')) {
+        var sampleEx5Pairs = [
+            { c: 'T', p: 'E' },
+            { c: 'W', p: 'H' },
+            { c: 'M', p: 'C' },
+            { c: 'R', p: 'S' },
+            { c: 'X', p: 'A' }
+        ];
+        for (var si = 0; si < sampleEx5Pairs.length; si++) {
+            var sc = container.querySelector('#mono-ex5-c' + si);
+            var sp = container.querySelector('#mono-ex5-p' + si);
+            if (sc) sc.value = sampleEx5Pairs[si].c;
+            if (sp) sp.value = sampleEx5Pairs[si].p;
+        }
+        var ex5Box = container.querySelector('#mono-ex5-box');
+        var ex5Fb = container.querySelector('#mono-ex5-feedback');
+        if (ex5Box) ex5Box.classList.add('correct');
+        if (ex5Fb) {
+            ex5Fb.className = 'exercise-feedback show correct-feedback';
+            ex5Fb.innerHTML = '🎉 Solved previously! All 5 frequency analysis mappings verified.';
+        }
+    }
+
+    // Restore saved frequency draft
+    var savedFreq = (utils.storage && utils.storage.get) ? utils.storage.get('draft_mono_freq', null) : null;
+    if (savedFreq && typeof savedFreq === 'object') {
+        freqMappings = savedFreq;
+    }
+    var savedCiphertext = (utils.storage && utils.storage.get) ? utils.storage.get('draft_mono_ciphertext', null) : null;
+    if (savedCiphertext) {
+        var freqInput = container.querySelector('#mono-freq-input');
+        if (freqInput) freqInput.value = savedCiphertext;
+        var cleanedSaved = utils.cleanText(savedCiphertext);
+        if (cleanedSaved.length >= 2) {
+            performFrequencyAnalysis(cleanedSaved);
+            container.querySelector('#mono-freq-results').style.display = 'block';
+        }
+    }
+
+    // Initial validation and display
+    updateAlphabetDisplay();
 });
