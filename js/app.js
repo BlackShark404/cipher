@@ -52,11 +52,36 @@
         }
 
         // Close mobile sidebar
-        var sidebar = document.getElementById('sidebar');
-        if (sidebar) sidebar.classList.remove('open');
+        closeMobileSidebar();
 
         // Scroll to top
         window.scrollTo(0, 0);
+    }
+
+    function openMobileSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var backdrop = document.getElementById('sidebar-backdrop');
+        var toggleBtn = document.getElementById('menu-toggle');
+        if (sidebar) sidebar.classList.add('open');
+        if (backdrop) backdrop.classList.add('active');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            toggleBtn.textContent = '✕';
+        }
+        document.body.classList.add('sidebar-open-locked');
+    }
+
+    function closeMobileSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var backdrop = document.getElementById('sidebar-backdrop');
+        var toggleBtn = document.getElementById('menu-toggle');
+        if (sidebar) sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('active');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.textContent = '☰';
+        }
+        document.body.classList.remove('sidebar-open-locked');
     }
 
     // ---- Theme Controller ----
@@ -243,18 +268,41 @@
             });
         }
 
-        // Mobile menu toggle
+        // Mobile menu toggle & drawer listeners
         var toggleBtn = document.getElementById('menu-toggle');
         var sidebar = document.getElementById('sidebar');
+        var backdrop = document.getElementById('sidebar-backdrop');
+        var closeBtn = document.getElementById('sidebar-close-btn');
+
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('open');
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (sidebar && sidebar.classList.contains('open')) {
+                    closeMobileSidebar();
+                } else {
+                    openMobileSidebar();
+                }
             });
         }
 
-        // Close sidebar when clicking outside on mobile
-        document.getElementById('main-content').addEventListener('click', function() {
-            sidebar.classList.remove('open');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeMobileSidebar();
+            });
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', function() {
+                closeMobileSidebar();
+            });
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileSidebar();
+            }
         });
 
         // Initialize all registered modules

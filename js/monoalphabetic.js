@@ -326,8 +326,10 @@
     // Frequency chart
     html += '<div class="subsection"><div class="subsection-title">Letter Frequency Chart</div>';
     html += '<p class="text-sm text-muted">Colored bars = ciphertext frequencies | Gray bars = standard English frequencies</p>';
+    html += '<div class="chart-scroll-wrap">';
     html += '<div class="chart-container" id="mono-freq-chart"></div>';
     html += '<div class="chart-labels" id="mono-freq-labels"></div>';
+    html += '</div>';
     html += '</div>';
 
     // Frequency table

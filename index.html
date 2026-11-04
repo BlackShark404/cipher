@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0a0e17">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -34,6 +34,7 @@
                     <p class="sidebar-subtitle"><span class="status-dot-pulse"></span> Classical Cipher Suite</p>
                 </div>
             </div>
+            <button id="sidebar-close-btn" class="sidebar-close-btn" aria-label="Close navigation menu">✕</button>
         </div>
 
         <div class="nav-section-title">CURRICULUM MODULES</div>
@@ -135,9 +136,10 @@
             </div>
         </div>
     </nav>
+    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
 
     <!-- Mobile menu toggle -->
-    <button id="menu-toggle" class="menu-toggle" aria-label="Toggle Navigation Menu">☰</button>
+    <button id="menu-toggle" class="menu-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false" aria-controls="sidebar">☰</button>
 
     <!-- Main Content -->
     <main id="main-content" class="main-content">
@@ -151,7 +153,8 @@
             <div class="top-header-actions">
                 <div class="lab-mode-chip">
                     <span class="chip-pulse"></span>
-                    <span>Live Simulator Active</span>
+                    <span class="chip-label-full">Live Simulator Active</span>
+                    <span class="chip-label-short">Live</span>
                 </div>
             </div>
         </header>

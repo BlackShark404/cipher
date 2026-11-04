@@ -1063,11 +1063,11 @@
             var html = `
             <div class="section-content">
                 <!-- Exam Top Bar -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-medium); padding: 0.75rem 1.25rem; border-radius: var(--radius); box-shadow: var(--shadow);">
-                    <div>
+                <div class="exam-top-hud" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-medium); padding: 0.75rem 1.25rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+                    <div class="exam-top-meta">
                         <span class="badge" style="background: var(--${q.cipher === 'monoalphabetic' ? 'mono' : q.cipher}-color);">${q.cipher.toUpperCase()}</span>
                         <span class="badge badge-${q.difficulty === 'easy' ? 'success' : q.difficulty === 'medium' ? 'warning' : 'danger'}" style="margin-left: 0.5rem;">${q.difficulty.toUpperCase()}</span>
-                        <span style="margin-left: 0.75rem; font-weight: 700;">Question ${qIndex} of ${totalQ}</span>
+                        <span class="exam-q-counter" style="margin-left: 0.75rem; font-weight: 700;">Question ${qIndex} of ${totalQ}</span>
                     </div>
                     ${timerDisplayHtml}
                 </div>
@@ -1090,9 +1090,9 @@
                         ${inputWidgetHtml}
 
                         <!-- Action Buttons -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; border-top: 1px solid var(--gray-200); padding-top: 1rem;">
+                        <div class="exam-actions-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; border-top: 1px solid var(--gray-200); padding-top: 1rem;">
                             <button id="btn-exam-hint" class="btn btn-secondary btn-sm">💡 Request Hint (-10% penalty)</button>
-                            <div style="display: flex; gap: 0.75rem;">
+                            <div class="exam-submit-group" style="display: flex; gap: 0.75rem;">
                                 <button id="btn-exam-skip" class="btn btn-secondary">Skip ↷</button>
                                 <button id="btn-exam-submit" class="btn btn-primary">Submit Answer ✓</button>
                             </div>
@@ -1702,8 +1702,8 @@
                     </div>
 
                     <div id="speed-drill-active" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
-                            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div class="speed-drill-hud" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                            <div class="speed-drill-counters" style="display: flex; align-items: center; gap: 1.5rem;">
                                 <div>
                                     <div class="text-xs text-muted" style="text-transform: uppercase; font-weight: 700;">Time Remaining</div>
                                     <div id="speed-drill-timer" style="font-size: 1.9rem; font-weight: 800; font-family: var(--font-mono); color: #f59e0b;">60s</div>
@@ -1736,7 +1736,7 @@
                     <div id="speed-drill-results" style="display: none; text-align: center; padding: 1.5rem 0;">
                         <h3 id="speed-drill-final-title" style="font-size: 1.6rem; margin-bottom: 0.5rem;">⏱️ Time's Up!</h3>
                         <p id="speed-drill-final-desc" style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1.5rem;"></p>
-                        <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.75rem;">
+                        <div class="speed-drill-stats-row" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.75rem; flex-wrap: wrap;">
                             <div class="stat-card" style="min-width: 130px;">
                                 <div class="stat-value" id="speed-drill-final-score">0</div>
                                 <div class="stat-label">Final Score</div>
