@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classical Cryptography — Interactive Learning Lab</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>🔐 CryptoLab</h2>
+            <p class="sidebar-subtitle">Classical Cipher Tutor</p>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-section="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Home</span>
+            </li>
+            <li class="nav-item" data-section="caesar">
+                <span class="nav-icon">🔄</span>
+                <span class="nav-text">Caesar Cipher</span>
+                <span class="nav-progress-dot" id="prog-caesar"></span>
+            </li>
+            <li class="nav-item" data-section="monoalphabetic">
+                <span class="nav-icon">🔤</span>
+                <span class="nav-text">Monoalphabetic Cipher</span>
+                <span class="nav-progress-dot" id="prog-monoalphabetic"></span>
+            </li>
+            <li class="nav-item" data-section="playfair">
+                <span class="nav-icon">🔲</span>
+                <span class="nav-text">Playfair Cipher</span>
+                <span class="nav-progress-dot" id="prog-playfair"></span>
+            </li>
+            <li class="nav-divider"></li>
+            <li class="nav-item" data-section="comparison">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Comparison Guide</span>
+            </li>
+            <li class="nav-item" data-section="exam">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text">Exam Simulation</span>
+            </li>
+            <li class="nav-item" data-section="review">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Review &amp; Reference</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="overall-progress">
+                <span>Overall Progress</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="overall-progress-fill" style="width:0%"></div>
+                </div>
+                <span id="overall-progress-text">0%</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile menu toggle -->
+    <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+        <!-- Home Section -->
+        <section id="section-home" class="section active">
+            <div class="section-content">
+                <div class="hero-banner">
+                    <h1>🔐 Classical Cryptography Interactive Lab</h1>
+                    <p class="hero-subtitle">Master Caesar, Monoalphabetic &amp; Playfair Ciphers through hands-on
+                        experimentation</p>
+                </div>
+                <div class="grid-3col home-cards">
+                    <div class="card home-card" data-goto="caesar">
+                        <div class="card-header" style="background:var(--caesar-color)">
+                            <h3>🔄 Caesar Cipher</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Learn the simplest substitution cipher. Shift letters, rotate the cipher wheel, and crack
+                                messages with brute force.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="home-prog-caesar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card home-card" data-goto="monoalphabetic">
+                        <div class="card-header" style="background:var(--mono-color)">
+                            <h3>🔤 Monoalphabetic Cipher</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Explore scrambled-alphabet encryption, and learn to crack it with frequency analysis — a
+                                critical exam skill.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="home-prog-mono" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card home-card" data-goto="playfair">
+                        <div class="card-header" style="background:var(--playfair-color)">
+                            <h3>🔲 Playfair Cipher</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Master digraph encryption with the 5×5 key matrix. Learn the three rules and practice
+                                preparing plaintext.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="home-prog-playfair" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-3col home-cards" style="margin-top:1rem">
+                    <div class="card home-card" data-goto="comparison">
+                        <div class="card-header" style="background:var(--gray-600)">
+                            <h3>📊 Compare Ciphers</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Side-by-side comparison of all three ciphers — key spaces, vulnerabilities, and when to
+                                use each.</p>
+                        </div>
+                    </div>
+                    <div class="card home-card" data-goto="exam">
+                        <div class="card-header" style="background:var(--danger)">
+                            <h3>📝 Exam Simulation</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Timed practice exam with randomized questions across all ciphers. Track your score and
+                                identify weak spots.</p>
+                        </div>
+                    </div>
+                    <div class="card home-card" data-goto="review">
+                        <div class="card-header" style="background:var(--success)">
+                            <h3>📋 Quick Reference</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Formulas, rules, definitions, common mistakes, and solving strategies — all in one place
+                                for last-minute review.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:2rem">
+                    <div class="card-body">
+                        <h3>How to Use This Lab</h3>
+                        <div class="step-display">
+                            <div class="step-item">
+                                <div class="step-number">1</div>
+                                <div class="step-content"><strong>Learn</strong> — Read the fundamentals and interact
+                                    with visual explanations.</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">2</div>
+                                <div class="step-content"><strong>Experiment</strong> — Use the interactive tools to
+                                    encrypt and decrypt with different inputs.</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-content"><strong>Practice</strong> — Solve exercises with hints and
+                                    step-by-step feedback.</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">4</div>
+                                <div class="step-content"><strong>Test Yourself</strong> — Take the practice exam to
+                                    simulate real exam conditions.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cipher Sections (populated by JS modules) -->
+        <section id="section-caesar" class="section"></section>
+        <section id="section-monoalphabetic" class="section"></section>
+        <section id="section-playfair" class="section"></section>
+        <section id="section-comparison" class="section"></section>
+        <section id="section-exam" class="section"></section>
+        <section id="section-review" class="section"></section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/caesar.js"></script>
+    <script src="js/monoalphabetic.js"></script>
+    <script src="js/playfair.js"></script>
+    <script src="js/exam.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
