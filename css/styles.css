@@ -2761,3 +2761,188 @@ table.styled-table td.mono {
         flex-direction: column;
     }
 }
+
+/* ===== Frequency Analysis Lab — word patterns, partial text, practice mode ===== */
+.fa-partial {
+    font-family: var(--font-mono);
+    word-break: break-word;
+}
+.fa-word {
+    display: inline-block;
+    margin: 0 0.45em 0.35em 0;
+    white-space: nowrap;
+}
+.fa-letter {
+    display: inline-block;
+    min-width: 0.62em;
+    text-align: center;
+    border-radius: 3px;
+    padding: 0 1px;
+}
+.fa-letter.solved {
+    color: var(--success);
+    font-weight: 700;
+}
+.fa-letter.unsolved {
+    color: var(--cipher-color);
+    background: rgba(251, 113, 133, 0.12);
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.fa-letter.unsolved:hover {
+    background: rgba(251, 113, 133, 0.3);
+}
+.fa-letter.blank {
+    color: var(--gray-400);
+    border-bottom: 2px solid var(--gray-400);
+    cursor: pointer;
+}
+.fa-letter.blank:hover {
+    color: var(--plain-color);
+    border-bottom-color: var(--plain-color);
+}
+
+.fa-map-cell.absent {
+    opacity: 0.4;
+}
+
+.fa-word-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: 460px;
+    overflow-y: auto;
+    padding: 0.25rem;
+}
+.fa-word-row {
+    display: grid;
+    grid-template-columns: minmax(90px, auto) 1fr;
+    grid-template-areas:
+        "cipher meta"
+        "cipher partial"
+        "suggestions suggestions";
+    gap: 0.3rem 0.9rem;
+    align-items: center;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.85rem;
+}
+.fa-word-row.short {
+    border-left: 3px solid var(--info);
+}
+.fa-word-cipher {
+    grid-area: cipher;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    color: var(--cipher-color);
+    word-break: break-all;
+}
+.fa-word-count {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    vertical-align: middle;
+}
+.fa-word-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+.fa-pattern-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--mono-color);
+    background: rgba(168, 85, 247, 0.14);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+}
+.fa-word-len {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+}
+.fa-repeat-badge,
+.fa-short-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+}
+.fa-repeat-badge {
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.fa-short-badge {
+    color: var(--info);
+    background: rgba(14, 165, 233, 0.14);
+    border: 1px solid rgba(14, 165, 233, 0.35);
+}
+.fa-word-partial {
+    grid-area: partial;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: var(--success);
+}
+.fa-suggestions {
+    grid-area: suggestions;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+.fa-suggestion {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--plain-color);
+    background: var(--bg-input);
+    border: 1px solid var(--border-medium);
+    border-radius: 20px;
+    padding: 0.2rem 0.7rem;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.fa-suggestion:hover {
+    border-color: var(--plain-color);
+    background: rgba(56, 189, 248, 0.15);
+    transform: translateY(-1px);
+}
+.fa-no-match {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--gray-500);
+}
+.fa-more-match {
+    font-size: 0.72rem;
+    color: var(--gray-500);
+}
+
+.fa-practice-panel {
+    margin-top: 1.25rem;
+    padding: 1rem 1.15rem;
+    background: var(--bg-surface-subtle);
+    border: 1px dashed var(--border-medium);
+    border-radius: var(--radius);
+}
+
+@media (max-width: 560px) {
+    .fa-word-row {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "cipher"
+            "meta"
+            "partial"
+            "suggestions";
+    }
+}

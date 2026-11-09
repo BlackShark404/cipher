@@ -9,7 +9,7 @@
 
     // ---- Pre-loaded frequency analysis example ----
     var FA_PLAIN = 'THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG AND THE BRAVE KNIGHT DEFENDS THE ANCIENT CASTLE FROM THE SHADOW';
-    var FA_KEY = 'XYMHTBZWCSADEJOGFVNRUPQKLG'; // a fixed random key for the pre-loaded example
+    var FA_KEY = 'XYMHTBZWCSADEJOGFVNRUPQKLI'; // a fixed valid permutation (all 26 letters once)
 
     function monoEncrypt(plain, key) {
         var cleaned = utils.cleanText(plain);
@@ -46,7 +46,21 @@
         return result;
     }
 
-    var FA_CIPHER = monoEncrypt(FA_PLAIN, FA_KEY);
+    // Canonical repeated-letter pattern of a word: first distinct letter -> A,
+    // next new letter -> B, etc. HELLO -> ABCCD, THE -> ABC, ALL -> ABB.
+    function wordPattern(word) {
+        var map = {};
+        var next = 0;
+        var out = '';
+        for (var i = 0; i < word.length; i++) {
+            var ch = word[i];
+            if (map[ch] === undefined) map[ch] = next++;
+            out += String.fromCharCode(65 + map[ch]);
+        }
+        return out;
+    }
+
+    var FA_CIPHER = monoEncryptPreserveSpaces(FA_PLAIN, FA_KEY);
 
     app.monoalphabetic = {
         encrypt: monoEncrypt,
@@ -59,6 +73,201 @@
     var EX5_PLAIN = 'SECRETS HIDDEN IN THE SHADOWS ARE OFTEN THE MOST DANGEROUS ONES TO REVEAL';
     var EX5_KEY = FA_KEY; // reuse the same key
     var EX5_CIPHER = monoEncrypt(EX5_PLAIN, EX5_KEY);
+
+    // ---- Frequency analysis: English word list for pattern matching ----
+    // Used to suggest candidate plaintext words that share a cipher word's
+    // length and repeated-letter pattern. This is a learning aid, not a solver.
+    var FA_WORD_LIST = (
+        'THE AND YOU ARE FOR NOT BUT HAD HAS WAS ALL CAN HER HIS ONE OUR OUT ' +
+        'DAY GET HIM HOW ITS MAY NEW NOW OLD SEE TWO WAY WHO DID LET SAY SHE TOO USE ' +
+        'MAN MEN BOY GIRL SON MOM DAD SIR MADAM KING QUEEN LORD LADY GOD ' +
+        'TIME YEAR PEOPLE WAY DAY NIGHT LIFE WORLD HOUSE HOME ROOM DOOR WALL ' +
+        'HAND HEAD FACE EYE EAR NOSE MOUTH FOOT FEET ARM LEG BODY HEART MIND ' +
+        'WATER FOOD BREAD MEAT MILK TEA WINE BEAN CORN RICE FRUIT APPLE ' +
+        'TREE WOOD FOREST RIVER LAKE SEA OCEAN HILL MOUNTAIN VALLEY FIELD ' +
+        'ROAD STREET PATH BRIDGE TOWER CASTLE GARDEN CITY TOWN VILLAGE ' +
+        'SUN MOON STAR SKY CLOUD RAIN SNOW WIND STORM FIRE FLAME LIGHT DARK ' +
+        'MORNING EVENING NOON MIDNIGHT TODAY TOMORROW YESTERDAY WEEK MONTH ' +
+        'GOOD BAD GREAT SMALL LARGE BIG LITTLE LONG SHORT HIGH LOW DEEP WIDE ' +
+        'NEW OLD YOUNG EARLY LATE FAST SLOW HARD SOFT EASY DIFFICULT SIMPLE ' +
+        'HOT COLD WARM COOL WET DRY CLEAN DIRTY FULL EMPTY OPEN CLOSED ' +
+        'HAPPY SAD ANGRY AFRAID BRAVE PROUD CALM QUIET LOUD KIND CRUEL ' +
+        'TRUE FALSE REAL RIGHT WRONG SAME OTHER DIFFERENT NEXT LAST FIRST ' +
+        'MAKE MADE TAKE TOOK GIVE GAVE GET GOT GO WENT COME CAME SEE SAW ' +
+        'KNOW KNOWN THINK THOUGHT SAY SAID TELL TOLD FIND FOUND KEEP KEPT ' +
+        'LEAVE LEFT FEEL FELT SEEM SEEMED BECOME BECAME BEGIN BEGAN RUN RAN ' +
+        'WALK WALKED MOVE MOVED LIVE LIVED LOVE LOVED LIKE LIKED WANT WANTED ' +
+        'NEEDED NEED HELP HELPED WORK WORKED PLAY PLAYED READ WRITE SPOKE ' +
+        'HEAR HEARD LISTEN WATCH LOOK LOOKED SHOW SHOWED TRY TRIED CALL CALLED ' +
+        'ASK ASKED ANSWER REPLY TURN TURNED START STARTED STOP STOPPED ' +
+        'ATTACK DEFEND SECRET MESSAGE CIPHER DECODE CRYPTO ENCRYPT DECRYPT ' +
+        'HIDDEN TREASURE MYSTERY PUZZLE ANSWER SECURITY SHADOW AGENT SPIES ' +
+        'SOLDIER BATTLE VICTORY DANGER ESCAPE RESCUE KNIGHT DRAGON SHIELD ' +
+        'GOLDEN SILVER DIAMOND THUNDER CASTLE KINGDOM BRAVE ANCIENT ' +
+        'QUICK BROWN FOX JUMPS OVER LAZY DOG SECRETS SHADOWS OFTEN MOST ' +
+        'DANGEROUS ONES REVEAL DEFENDS FROM INTO WITH WITHOUT WITHIN ' +
+        'ABOUT ABOVE ACROSS AFTER AGAIN AGAINST ALONG AMONG AROUND BEFORE ' +
+        'BEHIND BELOW BENEATH BESIDE BETWEEN BEYOND DURING THROUGH UNDER ' +
+        'UNTIL UPON WITHIN OUTSIDE INSIDE NEAR FAR HERE THERE WHERE WHEN ' +
+        'WHILE WHY WHAT WHICH WHOLE WHOSE WHOM THIS THAT THESE THOSE SUCH ' +
+        'EACH EVERY BOTH FEW MANY MUCH MORE LESS MOST SEVERAL SOME ANY NONE ' +
+        'VERY JUST ONLY ALSO EVEN STILL ALREADY ALWAYS NEVER SOMETIMES OFTEN ' +
+        'REALLY ALMOST ENOUGH QUITE RATHER TOO SOON AGAIN AWAY BACK FORTH ' +
+        'WELL ILL YES NO PLEASE THANKS SORRY HELLO GOODBYE WELCOME ' +
+        'KNOWLEDGE POWER ENTHUSIASM REASON ROMANCE SCIENCE DISCIPLINE ' +
+        'PREDICT FUTURE CREATE IMAGINE BELIEVE ACHIEVE SUCCESS FAILURE ' +
+        'EFFORT COURAGE WISDOM TRUTH HONOR JUSTICE FREEDOM PEACE WAR ' +
+        'NATION COUNTRY GOVERNMENT LAW ORDER RULE LEADER FOLLOWER ' +
+        'FRIEND ENEMY FAMILY FATHER MOTHER BROTHER SISTER CHILD CHILDREN ' +
+        'PERSON WOMAN MAN PEOPLE HUMAN BEING SOUL SPIRIT GHOST ' +
+        'BOOK PAGE WORD LETTER STORY POEM SONG MUSIC ART PAINT DRAW ' +
+        'SCHOOL STUDENT TEACHER CLASS LESSON LEARN STUDY TEACH TEST EXAM ' +
+        'QUESTION PROBLEM SOLUTION IDEA THOUGHT PLAN GOAL DREAM HOPE WISH ' +
+        'MONEY PRICE COST VALUE TRADE BUY SELL PAY SPEND SAVE EARN ' +
+        'SHIP BOAT CAR TRAIN PLANE HORSE RIDER DRIVER PILOT CAPTAIN ' +
+        'NORTH SOUTH EAST WEST LEFT RIGHT CENTER MIDDLE EDGE SIDE TOP BOTTOM ' +
+        'POINT LINE PART PIECE BIT BLOCK STONE METAL IRON STEEL GLASS PAPER ' +
+        'COLOR RED BLUE GREEN YELLOW BLACK WHITE GRAY PURPLE ORANGE PINK ' +
+        'NUMBER COUNT ADD SUBTRACT MULTIPLY DIVIDE EQUAL HALF DOUBLE ' +
+        'SOUND VOICE NOISE SILENCE ECHO WHISPER SHOUT CRY LAUGH SMILE ' +
+        'NAME SIGN MARK SYMBOL SIGNAL FLAG BANNER CROWN SWORD SPEAR ARROW ' +
+        'BOW BLADE ARMOR HELMET WALL GATE KEY LOCK CODE MAP CHART ' +
+        'SEND SENT RECEIVE RECEIVED DELIVER CARRY CARRIED BRING BROUGHT ' +
+        'HOLD HELD CATCH CAUGHT THROW THREW DROP DROPPED FALL FELL RISE ROSE ' +
+        'STAND STOOD SIT SAT LIE LAY SLEEP SLEPT WAKE WOKE EAT ATE DRINK DRANK ' +
+        'MEET MET WAIT WAITED STAY STAYED REMAIN REMAINED RETURN RETURNED ' +
+        'ENTER ENTERED EXIT PASS PASSED CROSS CROSSED REACH REACHED ' +
+        'HIDE HID HIDDEN SEEK SOUGHT SEARCH FOUND DISCOVER REVEAL CONCEAL ' +
+        'PROTECT PROTECTED GUARD GUARDED SAVE SAVED SAFE SAFETY SECURE ' +
+        'TRUST BELIEVE DOUBT FEAR HOPE EXPECT SUPPOSE GUESS WONDER ' +
+        'IMPORTANT NECESSARY POSSIBLE IMPOSSIBLE CERTAIN SURE CLEAR OBVIOUS ' +
+        'STRANGE WEIRD NORMAL NATURAL COMMON RARE USUAL SPECIAL ORDINARY ' +
+        'BEAUTIFUL PRETTY UGLY HANDSOME LOVELY NICE WONDERFUL TERRIBLE ' +
+        'STRONG WEAK HEAVY LIGHT THICK THIN NARROW BROAD SHARP DULL ' +
+        'ALIVE DEAD DEADLY LIVING YOUTHFUL AGED MODERN ANCIENT RECENT ' +
+        'COMPLETE ENTIRE TOTAL WHOLE FULL PARTIAL BROKEN FIXED REPAIRED ' +
+        'BUILD BUILT DESTROY DESTROYED RUIN RUINED CREATE CREATED FORM ' +
+        'CHANGE CHANGED TURN GROW GREW DEVELOP IMPROVE INCREASE DECREASE ' +
+        'CONTINUE CONTINUED REMAIN FOLLOW FOLLOWED LEAD LED GUIDE GUIDED ' +
+        'ALLOW ALLOWED PERMIT LET FORCE FORCED COMPEL OBLIGE REQUIRE ' +
+        'ABLE UNABLE WILLING READY PREPARED WILL SHALL MUST SHOULD COULD ' +
+        'WOULD MIGHT MAYBE PERHAPS PROBABLY POSSIBLY CERTAINLY DEFINITELY ' +
+        'ACTUALLY BASICALLY GENERALLY USUALLY NORMALLY TYPICALLY FINALLY ' +
+        'SUDDENLY IMMEDIATELY QUICKLY SLOWLY CAREFULLY CLEARLY DIRECTLY ' +
+        'EXACTLY NEARLY SIMPLY MERELY TRULY REALLY INDEED ABSOLUTELY ' +
+        'EVERYTHING SOMETHING NOTHING ANYTHING EVERYONE SOMEONE ANYONE ' +
+        'NOBODY EVERYBODY SOMEWHERE ANYWHERE NOWHERE EVERYWHERE ' +
+        'HIMSELF HERSELF ITSELF THEMSELVES OURSELVES YOURSELF MYSELF ' +
+        'BEEN BEING DONE DOES DOING DONE HAVING HAVE HAVING SAID SAYS ' +
+        'ACROSS ALMOST ALONG ALREADY ALTHOUGH AMONG ANOTHER ANYBODY ' +
+        'ANYTHING AROUND BECAUSE BECOME BEFORE BEHIND BELIEVE BESIDE ' +
+        'BETWEEN BEYOND BROUGHT CALLED CANNOT CAREFUL CERTAIN CHANCE ' +
+        'CHANGE CHILDREN CLOSE COMING COMMON COMPLETE CONCERN CONDITION ' +
+        'CONSIDER CONTINUE CONTROL CORRECT COURSE COVER CURRENT DEAL ' +
+        'DECIDE DECLARE DEEP DEGREE DELIVER DEMAND DEPEND DESCRIBE ' +
+        'DESIRE DESTROY DETAIL DETERMINE DEVELOP DIFFERENCE DIFFERENT ' +
+        'DIFFICULT DIRECT DISCOVER DISCUSS DISEASE DISTANCE DIVIDE ' +
+        'DOCTOR DOES DONE DOUBT DRAW DREAM DRESS DRIVE DROP DURING ' +
+        'EACH EARLY EARTH EASILY EAST EFFECT EFFORT EITHER ELSE END ' +
+        'ENOUGH ENTER ENTIRE EQUAL ESCAPE ESPECIAL EVEN EVENT EVER EVERY ' +
+        'EXACT EXAMPLE EXCEPT EXCUSE EXERCISE EXPECT EXPERIENCE EXPLAIN ' +
+        'EXPRESS EXTREME FACE FACT FAIL FAIR FALL FAMILY FAMOUS FAR ' +
+        'FARM FAST FATHER FAVOR FEAR FEEL FEET FELL FELT FEW FIELD ' +
+        'FIGHT FIGURE FILL FINAL FIND FINE FINISH FIRE FIRST FISH FIVE ' +
+        'FLOOR FLOW FLOWER FLY FOLLOW FOOD FOOT FOR FORCE FORM FORTH ' +
+        'FORWARD FOUND FOUR FREE FRESH FRIEND FROM FRONT FULL FUN ' +
+        'FUTURE GAME GARDEN GAVE GENERAL GET GIRL GIVE GLAD GO GOD ' +
+        'GOING GOLD GONE GOOD GOT GOVERN GRASS GREAT GREEN GREW GROUND ' +
+        'GROUP GROW GUESS GUN HAD HAIR HALF HAND HAPPEN HARD HAS ' +
+        'HATE HAVE HEAD HEAR HEARD HEART HEAT HEAVY HELD HELP HER ' +
+        'HERE HIGH HIM HIMSELF HIS HOLD HOME HOPE HORSE HOT HOUR ' +
+        'HOUSE HOW HOWEVER HUGE HUMAN HUNDRED HUNT HURRY HUSBAND ' +
+        'IDEA IF IMPORTANT IN INCREASE INDEED INSIDE INSTEAD INTEREST ' +
+        'INTO IRON IS IT ITS ITSELF JOB JOIN JOKE JOURNEY JOY JUDGE ' +
+        'JUMP JUST KEEP KEPT KEY KILL KIND KING KNEW KNOW KNOWN ' +
+        'LADY LAID LAKE LAND LANGUAGE LARGE LAST LATE LATER LAUGH ' +
+        'LAW LAY LEAD LEARN LEAST LEAVE LED LEFT LEG LENGTH LESS ' +
+        'LET LETTER LEVEL LIE LIFE LIFT LIGHT LIKE LINE LIST LISTEN ' +
+        'LITTLE LIVE LIVING LOAD LONG LOOK LORD LOSE LOSS LOST LOT ' +
+        'LOUD LOVE LOW MACHINE MADE MAIN MAKE MAN MANNER MANY MAP ' +
+        'MARK MARKET MASTER MATTER MAY MAYBE ME MEAN MEANT MEASURE ' +
+        'MEET MEMBER MEMORY MEN MENTION METHOD MIDDLE MIGHT MILE ' +
+        'MILK MILL MIND MINE MINUTE MISS MISTAKE MIX MOMENT MONEY ' +
+        'MONTH MOON MORE MORNING MOST MOTHER MOUNTAIN MOUTH MOVE ' +
+        'MUCH MUSIC MUST MY MYSELF NAME NARROW NATION NATURAL NATURE ' +
+        'NEAR NEARLY NECESSARY NECK NEED NEITHER NEVER NEW NEWS NEXT ' +
+        'NICE NIGHT NINE NO NOBODY NONE NOR NORTH NOSE NOT NOTE ' +
+        'NOTHING NOTICE NOW NUMBER OBJECT OCEAN OF OFF OFFER OFFICE ' +
+        'OFTEN OIL OLD ON ONCE ONE ONLY OPEN OR ORDER OTHER OUGHT ' +
+        'OUR OUT OUTSIDE OVER OWN PAGE PAIN PAINT PAIR PAPER PART ' +
+        'PARTY PASS PAST PAY PEACE PEOPLE PER PERFECT PERHAPS PERSON ' +
+        'PICK PIECE PLACE PLAN PLANT PLAY PLEASE POINT POOR POSITION ' +
+        'POSSIBLE POWER PRACTICE PREPARE PRESENT PRESS PRETTY PRICE ' +
+        'PRINT PRISON PRODUCE PROPER PROVE PROVIDE PUBLIC PULL PURPOSE ' +
+        'PUSH PUT QUALITY QUARTER QUEEN QUESTION QUICK QUIET QUITE ' +
+        'RACE RADIO RAIN RAISE RAN RANGE RATE RATHER REACH READ ' +
+        'READY REAL REASON RECEIVE RECORD RED REFUSE REGARD REMAIN ' +
+        'REMEMBER REPEAT REPLY REPORT REST RESULT RETURN RICH RIDE ' +
+        'RIGHT RING RISE RIVER ROAD ROCK ROLL ROOM ROUND ROW RULE ' +
+        'RUN SAFE SAID SAIL SAME SAT SAVE SAW SAY SCHOOL SCIENCE ' +
+        'SEA SEASON SEAT SECOND SECRET SEE SEEM SEEN SELF SELL SEND ' +
+        'SENSE SENT SEPARATE SERVE SET SETTLE SEVEN SEVERAL SHALL ' +
+        'SHAPE SHARE SHARP SHE SHIP SHOE SHOOT SHOP SHORT SHOULD ' +
+        'SHOUT SHOW SHUT SIDE SIGHT SIGN SILENCE SIMPLE SINCE SING ' +
+        'SINGLE SIR SISTER SIT SIX SIZE SKIN SKY SLEEP SLOW SMALL ' +
+        'SMELL SMILE SMOKE SNOW SO SOCIAL SOFT SOIL SOLDIER SOME ' +
+        'SOMETHING SOMETIMES SON SONG SOON SORT SOUND SOUTH SPACE ' +
+        'SPEAK SPECIAL SPEED SPEND SPOKE SPOT SPREAD SPRING SQUARE ' +
+        'STAND STAR START STATE STAY STEAL STEP STICK STILL STONE ' +
+        'STOP STORE STORY STRAIGHT STRANGE STREET STRONG STUDY ' +
+        'SUBJECT SUCH SUDDEN SUGAR SUIT SUMMER SUN SUPPOSE SURE ' +
+        'SURPRISE SWEET SWIM SYSTEM TABLE TAKE TALK TALL TASTE TEACH ' +
+        'TEAR TELL TEMPLE TEN TERM TERRIBLE TEST THAN THANK THAT ' +
+        'THE THEIR THEM THEN THERE THESE THEY THICK THIN THING ' +
+        'THINK THIRD THIS THOSE THOUGH THOUGHT THOUSAND THREE THROUGH ' +
+        'THROW THUS TIE TILL TIME TINY TO TODAY TOGETHER TOLD ' +
+        'TOMORROW TONIGHT TOO TOOK TOP TOTAL TOUCH TOWARD TOWN ' +
+        'TRADE TRAIN TRAVEL TREE TRIP TROUBLE TRUE TRUST TRUTH ' +
+        'TRY TURN TWELVE TWENTY TWO TYPE UNDER UNDERSTAND UNION ' +
+        'UNIT UNTIL UP UPON US USE USED USUAL VALUE VARIOUS VERY ' +
+        'VIEW VILLAGE VISIT VOICE WAIT WALK WALL WANT WAR WARM ' +
+        'WAS WASH WATCH WATER WAVE WAY WE WEAR WEATHER WEEK ' +
+        'WEIGHT WELCOME WELL WENT WERE WEST WHAT WHEEL WHEN WHERE ' +
+        'WHETHER WHICH WHILE WHITE WHO WHOLE WHOM WHOSE WHY WIDE ' +
+        'WIFE WILD WILL WIN WIND WINDOW WINE WING WINTER WIRE ' +
+        'WISE WISH WITH WITHIN WITHOUT WOMAN WONDER WOOD WORD ' +
+        'WORK WORLD WORRY WORTH WOULD WRITE WRONG YEAR YELLOW ' +
+        'YES YESTERDAY YET YOU YOUNG YOUR YOURSELF YOUTH'
+    ).split(/\s+/);
+    // De-duplicate the word list
+    FA_WORD_LIST = FA_WORD_LIST.filter(function(w, i, a) {
+        return w.length > 0 && a.indexOf(w) === i;
+    });
+
+    // Index words by "length:pattern" for fast candidate lookup
+    var FA_WORD_INDEX = {};
+    for (var wi = 0; wi < FA_WORD_LIST.length; wi++) {
+        var ww = FA_WORD_LIST[wi];
+        var wkey = ww.length + ':' + wordPattern(ww);
+        if (!FA_WORD_INDEX[wkey]) FA_WORD_INDEX[wkey] = [];
+        FA_WORD_INDEX[wkey].push(ww);
+    }
+
+    // ---- Practice challenge plaintext pool (known answers for self-checking) ----
+    var FA_PRACTICE_PLAINS = [
+        FA_PLAIN,
+        EX5_PLAIN,
+        'THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG',
+        'NEVER TRUST A MESSAGE THAT YOU CANNOT VERIFY WITH YOUR OWN EYES',
+        'KNOWLEDGE IS POWER BUT ENTHUSIASM PULLS THE SWITCH',
+        'THE BEST WAY TO PREDICT THE FUTURE IS TO CREATE IT',
+        'ATTACK AT DAWN AND DEFEND THE CASTLE UNTIL THE REINFORCEMENTS ARRIVE',
+        'A JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP',
+        'THE ONLY THING WE HAVE TO FEAR IS FEAR ITSELF',
+        'TO BE OR NOT TO BE THAT IS THE QUESTION',
+        'ALL THAT GLITTERS IS NOT GOLD AND OFTEN THE SHADOWS HIDE THE TRUTH',
+        'PRACTICE MAKES PERFECT AND PATIENCE REVEALS EVERY SECRET'
+    ];
 
     app.registerModule('monoalphabetic', function(container) {
         var progress = app.progress;
@@ -317,8 +526,12 @@
 
     html += '<div class="btn-group">';
     html += '<button class="btn btn-danger" id="mono-freq-analyze-btn">📊 Analyze Frequencies</button>';
-    html += '<button class="btn btn-warning btn-sm" id="mono-freq-load-example">Load Practice Example</button>';
+    html += '<button class="btn btn-warning btn-sm" id="mono-freq-load-example">📋 Practice Example</button>';
+    html += '<button class="btn btn-primary btn-sm" id="mono-freq-random-challenge">🎲 Random Challenge</button>';
     html += '</div>';
+
+    // Active practice challenge banner
+    html += '<div id="mono-freq-challenge-banner" class="alert alert-info" style="display:none;margin-top:1rem"></div>';
 
     // Analysis results (initially hidden)
     html += '<div id="mono-freq-results" style="display:none;margin-top:1.5rem">';
@@ -347,12 +560,19 @@
     html += '<div id="mono-freq-bigrams"></div>';
     html += '</div>';
 
+    // Word patterns & suggestions
+    html += '<div class="subsection" style="border-left-color:var(--info)"><div class="subsection-title">🔍 Word Patterns &amp; Suggestions</div>';
+    html += '<p class="text-sm text-muted">Each cipher word is shown with its <strong>repeated-letter pattern</strong> (e.g. <code>ABCCD</code> = HELLO). Candidate English words match the pattern and your current mappings. Click a candidate to apply it — these are <em>guesses to verify</em>, not answers.</p>';
+    html += '<div id="mono-freq-words" class="fa-word-panel"></div>';
+    html += '</div>';
+
     // Interactive Mapping Workspace
     html += '<div class="subsection" style="border-left-color:var(--danger)"><div class="subsection-title">🧩 Interactive Mapping Workspace</div>';
     html += '<p>Assign plaintext guesses to ciphertext letters. Partially decrypted text updates live below.</p>';
 
     html += '<div class="btn-group" style="margin-bottom:1rem">';
-    html += '<button class="btn btn-warning btn-sm" id="mono-freq-auto-suggest">💡 Auto-Suggest (by frequency)</button>';
+    html += '<button class="btn btn-warning btn-sm" id="mono-freq-auto-suggest">💡 Frequency Hint (top 3)</button>';
+    html += '<button class="btn btn-secondary btn-sm" id="mono-freq-toggle-placeholder">🙈 Hide Unsolved Letters</button>';
     html += '<button class="btn btn-secondary btn-sm" id="mono-freq-clear-mappings">🗑️ Clear All Mappings</button>';
     html += '</div>';
 
@@ -364,8 +584,21 @@
 
     // Partially decrypted text
     html += '<div class="subsection-title" style="margin-top:1rem">Partially Decrypted Text</div>';
-    html += '<p class="text-sm text-muted">Assigned letters appear as <strong style="color:var(--success)">lowercase green</strong>. Unresolved letters remain as <strong style="color:var(--cipher-color)">UPPERCASE red</strong>.</p>';
-    html += '<div id="mono-freq-partial" class="result-box" style="font-size:1.1rem;letter-spacing:1px;line-height:2;min-height:60px"></div>';
+    html += '<p class="text-sm text-muted">Solved letters appear as <strong style="color:var(--success)">lowercase green</strong>. Unsolved letters are <strong style="color:var(--cipher-color)">highlighted</strong> (or hidden as <code>_</code>). Click any letter to jump to its mapping box. Word spaces are preserved so you can spot real words.</p>';
+    html += '<div id="mono-freq-partial" class="result-box fa-partial" style="font-size:1.15rem;letter-spacing:1px;line-height:2.1;min-height:60px"></div>';
+
+    // Practice mode panel (shown when a known challenge is active)
+    html += '<div id="mono-freq-practice-panel" class="fa-practice-panel" style="display:none">';
+    html += '<div class="subsection-title" style="margin-top:0.5rem">🎓 Practice Mode — Solve It Yourself</div>';
+    html += '<p class="text-sm text-muted">Reconstruct the original sentence using frequency analysis and word patterns. Nothing is auto-decrypted for you. Use hints only if you get stuck.</p>';
+    html += '<div class="btn-group">';
+    html += '<button class="btn btn-primary btn-sm" id="mono-freq-hint-btn">💡 Progressive Hint (<span id="mono-freq-hint-count">0</span> used)</button>';
+    html += '<button class="btn btn-success btn-sm" id="mono-freq-check-answer">✅ Check My Answer</button>';
+    html += '<button class="btn btn-secondary btn-sm" id="mono-freq-reveal">🏳️ Reveal Solution</button>';
+    html += '</div>';
+    html += '<div id="mono-freq-hint-text" class="exercise-hint"></div>';
+    html += '<div id="mono-freq-answer-feedback" class="exercise-feedback"></div>';
+    html += '</div>';
 
     html += '</div>'; // end mapping workspace subsection
 
@@ -726,14 +959,42 @@
 
     // ---- FREQUENCY ANALYSIS ----
     var freqMappings = {}; // cipher letter → plaintext guess
+    var faOriginalText = ''; // raw ciphertext incl. spaces/punctuation
+    var faCleanText = '';    // letters-only ciphertext
+    var faCounts = {};       // cipher letter counts
+    var placeholderMode = false; // false = show cipher letters, true = show blanks
+    var currentChallenge = null; // { name, plain, key, cipher, hintsUsed, solved }
+
+    // Load a known practice challenge (answer-checkable)
+    function loadChallenge(name, plain, key) {
+        var cipher = monoEncryptPreserveSpaces(plain, key);
+        currentChallenge = {
+            name: name,
+            plain: plain,
+            key: key,
+            cipher: cipher,
+            hintsUsed: 0,
+            solved: false
+        };
+        freqMappings = {};
+        if (utils.storage && utils.storage.remove) utils.storage.remove('draft_mono_freq');
+        container.querySelector('#mono-freq-input').value = cipher;
+        if (utils.storage && utils.storage.set) utils.storage.set('draft_mono_ciphertext', cipher);
+        runAnalysis(cipher);
+        utils.showToast('Practice challenge loaded. Solve it with frequency analysis!', 'info');
+    }
 
     container.querySelector('#mono-freq-load-example').addEventListener('click', function() {
-        container.querySelector('#mono-freq-input').value = FA_CIPHER;
-        if (utils.storage && utils.storage.set) {
-            utils.storage.set('draft_mono_ciphertext', FA_CIPHER);
-        }
+        loadChallenge('Practice Example — Pangram', FA_PLAIN, FA_KEY);
     });
 
+    container.querySelector('#mono-freq-random-challenge').addEventListener('click', function() {
+        var plain = utils.randPick(FA_PRACTICE_PLAINS);
+        var key = utils.shuffleArray(ALPHA.split('')).join('');
+        loadChallenge('Random Challenge', plain, key);
+    });
+
+    // Analyze whatever is in the textarea; keep challenge only if text matches it
     container.querySelector('#mono-freq-analyze-btn').addEventListener('click', function() {
         var text = container.querySelector('#mono-freq-input').value;
         var cleaned = utils.cleanText(text);
@@ -741,15 +1002,33 @@
             utils.showToast('Please enter some ciphertext to analyze (at least 2 letters).', 'danger');
             return;
         }
+        if (currentChallenge && utils.cleanText(currentChallenge.cipher) !== cleaned) {
+            currentChallenge = null; // user switched to custom ciphertext
+        }
         if (utils.storage && utils.storage.set) {
             utils.storage.set('draft_mono_ciphertext', text);
         }
-        performFrequencyAnalysis(cleaned);
-        container.querySelector('#mono-freq-results').style.display = 'block';
-        utils.animateElement(container.querySelector('#mono-freq-results'), 'fade-in');
+        runAnalysis(text);
     });
 
-    function performFrequencyAnalysis(text) {
+    // Shared analysis entry point: validates, shows results, renders everything
+    function runAnalysis(text) {
+        var cleaned = utils.cleanText(text);
+        if (cleaned.length < 2) {
+            utils.showToast('Please enter some ciphertext to analyze (at least 2 letters).', 'danger');
+            return;
+        }
+        performFrequencyAnalysis(text);
+        container.querySelector('#mono-freq-results').style.display = 'block';
+        updateChallengeUI();
+        utils.animateElement(container.querySelector('#mono-freq-results'), 'fade-in');
+    }
+
+    function performFrequencyAnalysis(rawText) {
+        faOriginalText = rawText;
+        var text = utils.cleanText(rawText);
+        faCleanText = text;
+
         // Count frequencies
         var counts = {};
         var total = text.length;
@@ -757,6 +1036,7 @@
         for (var i = 0; i < text.length; i++) {
             if (counts[text[i]] !== undefined) counts[text[i]]++;
         }
+        faCounts = counts;
 
         // Calculate percentages
         var freqs = {};
@@ -799,19 +1079,22 @@
 
         // Frequency table
         var sorted = ALPHA.split('').sort(function(a, b) { return freqs[b] - freqs[a]; });
-        var tableHtml = '<table class="styled-table"><thead><tr><th>Rank</th><th>Letter</th><th>Count</th><th>Frequency</th><th>English Expected</th></tr></thead><tbody>';
+        var engOrderRef = 'ETAOINSHRDLCUMWFGYPBVKJXQZ';
+        var tableHtml = '<table class="styled-table"><thead><tr><th>Rank</th><th>Letter</th><th>Count</th><th>Frequency</th><th>English Expected</th><th>Likely Match*</th></tr></thead><tbody>';
         for (var i = 0; i < 26; i++) {
             var l = sorted[i];
-            if (counts[l] === 0 && i > 10) continue; // skip zero-count letters after top ones
-            tableHtml += '<tr' + (i < 5 ? ' style="font-weight:700"' : '') + '>';
+            var dim = counts[l] === 0 ? ' style="opacity:0.45"' : (i < 5 ? ' style="font-weight:700"' : '');
+            tableHtml += '<tr' + dim + '>';
             tableHtml += '<td>' + (i + 1) + '</td>';
             tableHtml += '<td class="mono" style="color:var(--cipher-color)">' + l + '</td>';
             tableHtml += '<td>' + counts[l] + '</td>';
             tableHtml += '<td>' + freqs[l].toFixed(1) + '%</td>';
             tableHtml += '<td>' + utils.englishFrequencies[l].toFixed(1) + '%</td>';
+            tableHtml += '<td class="mono" style="color:var(--plain-color)">' + (counts[l] > 0 ? engOrderRef[i] + '?' : '—') + '</td>';
             tableHtml += '</tr>';
         }
         tableHtml += '</tbody></table>';
+        tableHtml += '<p class="text-sm text-muted" style="margin-top:0.5rem">*Likely Match pairs the ciphertext rank with the English frequency rank (E, T, A, O…). It is only a <strong>starting hypothesis</strong> — short texts often deviate, so confirm with word patterns below.</p>';
         container.querySelector('#mono-freq-table').innerHTML = tableHtml;
 
         // Most common letters ranking
@@ -852,52 +1135,95 @@
 
         // Build mapping grid
         buildMappingGrid(text, freqs, counts);
+
+        // Word patterns & suggestions (uses original text with spaces)
+        renderWordPatterns();
     }
 
     function buildMappingGrid(text, freqs, counts) {
         var grid = container.querySelector('#mono-freq-mapping-grid');
         var gridHtml = '';
 
-        // Only show letters that actually appear in the ciphertext, sorted by frequency
-        var presentLetters = ALPHA.split('').filter(function(l) { return counts && counts[l] > 0; });
-        // But also show all 26 for completeness
+        // Show all 26 letters; dim ones that never appear in the ciphertext
         for (var i = 0; i < 26; i++) {
             var letter = ALPHA[i];
-            gridHtml += '<div style="text-align:center">';
+            var present = counts && counts[letter] > 0;
+            gridHtml += '<div class="fa-map-cell' + (present ? '' : ' absent') + '" style="text-align:center">';
             gridHtml += '<div style="font-family:var(--font-mono);font-weight:700;color:var(--cipher-color);font-size:0.9rem">' + letter + '</div>';
-            gridHtml += '<div style="font-size:0.6rem;color:var(--gray-500)">' + (counts ? counts[letter] : 0) + '</div>';
-            gridHtml += '<input type="text" maxlength="1" class="mono-freq-map-input" data-cipher="' + letter + '" value="' + (freqMappings[letter] || '') + '" style="width:30px;height:30px;text-align:center;font-family:var(--font-mono);font-weight:700;border:2px solid var(--plain-color);border-radius:4px;font-size:0.8rem;text-transform:uppercase;color:var(--plain-color);margin-top:2px">';
+            gridHtml += '<div style="font-size:0.6rem;color:var(--gray-500)">' + (counts ? counts[letter] : 0) + '×</div>';
+            gridHtml += '<input type="text" maxlength="1" class="mono-freq-map-input" data-cipher="' + letter + '" value="' + (freqMappings[letter] || '') + '" placeholder="?" aria-label="Plaintext guess for cipher letter ' + letter + '" style="width:32px;height:32px;text-align:center;font-family:var(--font-mono);font-weight:700;border:2px solid var(--plain-color);border-radius:4px;font-size:0.85rem;text-transform:uppercase;color:var(--plain-color);margin-top:2px">';
             gridHtml += '</div>';
         }
         grid.innerHTML = gridHtml;
-
-        // Store reference data
         grid._ciphertext = text;
 
-        // Attach mapping input listeners
+        // Attach mapping input listeners (centralized one-to-one enforcement)
         grid.querySelectorAll('.mono-freq-map-input').forEach(function(inp) {
             inp.addEventListener('input', function() {
-                var cipherLetter = this.dataset.cipher;
-                var val = this.value.toUpperCase().replace(/[^A-Z]/g, '');
-                this.value = val;
-
-                if (val) {
-                    freqMappings[cipherLetter] = val;
-                } else {
-                    delete freqMappings[cipherLetter];
-                }
-
-                if (utils.storage && utils.storage.set) {
-                    utils.storage.set('draft_mono_freq', freqMappings);
-                }
-
-                validateFreqMappings();
-                updatePartialDecrypt();
-                checkFreqProgress();
+                handleMappingInput(this);
+            });
+            inp.addEventListener('focus', function() {
+                this.select();
             });
         });
 
         updatePartialDecrypt();
+    }
+
+    // Handle a single mapping input change, enforcing one-to-one mapping.
+    function handleMappingInput(inp) {
+        var cipherLetter = inp.dataset.cipher;
+        var val = inp.value.toUpperCase().replace(/[^A-Z]/g, '');
+        inp.value = val;
+        setMapping(cipherLetter, val, true);
+    }
+
+    // Central mapping setter. If plainLetter is already used by another cipher
+    // letter, it is reassigned (moved) here to preserve the one-to-one rule.
+    function setMapping(cipherLetter, plainLetter, notify) {
+        if (plainLetter) {
+            // Find any other cipher letter currently mapped to this plaintext letter
+            var previousOwner = null;
+            for (var c in freqMappings) {
+                if (c !== cipherLetter && freqMappings[c] === plainLetter) {
+                    previousOwner = c;
+                    break;
+                }
+            }
+            if (previousOwner) {
+                delete freqMappings[previousOwner];
+                var prevInput = container.querySelector('.mono-freq-map-input[data-cipher="' + previousOwner + '"]');
+                if (prevInput) prevInput.value = '';
+                if (notify) {
+                    utils.showToast('"' + plainLetter + '" moved from ' + previousOwner + ' → ' + cipherLetter + ' (each plaintext letter is used once).', 'info');
+                }
+            }
+            freqMappings[cipherLetter] = plainLetter;
+        } else {
+            delete freqMappings[cipherLetter];
+        }
+
+        // Sync the input box for this cipher letter
+        var inp = container.querySelector('.mono-freq-map-input[data-cipher="' + cipherLetter + '"]');
+        if (inp) inp.value = freqMappings[cipherLetter] || '';
+
+        if (utils.storage && utils.storage.set) {
+            utils.storage.set('draft_mono_freq', freqMappings);
+        }
+
+        validateFreqMappings();
+        updatePartialDecrypt();
+        renderWordPatterns();
+        checkFreqProgress();
+    }
+
+    // Apply a whole-word guess (cipherWord → plainWord), enforcing one-to-one.
+    function applyWordGuess(cipherWord, plainWord) {
+        if (cipherWord.length !== plainWord.length) return;
+        for (var i = 0; i < cipherWord.length; i++) {
+            setMapping(cipherWord[i], plainWord[i], false);
+        }
+        utils.showToast('Applied guess: ' + cipherWord + ' → ' + plainWord + '. Verify it fits the sentence!', 'success');
     }
 
     function validateFreqMappings() {
@@ -951,25 +1277,40 @@
     }
 
     function updatePartialDecrypt() {
-        var grid = container.querySelector('#mono-freq-mapping-grid');
-        var text = grid._ciphertext || container.querySelector('#mono-freq-input').value.toUpperCase();
         var partialDiv = container.querySelector('#mono-freq-partial');
         if (!partialDiv) return;
+        var text = faOriginalText || container.querySelector('#mono-freq-input').value;
 
-        var result = '';
-        for (var i = 0; i < text.length; i++) {
-            var ch = text[i];
-            if (ch >= 'A' && ch <= 'Z') {
-                if (freqMappings[ch]) {
-                    result += '<span style="color:var(--success);font-weight:700">' + freqMappings[ch].toLowerCase() + '</span>';
-                } else {
-                    result += '<span style="color:var(--cipher-color)">' + ch + '</span>';
-                }
-            } else {
-                result += ch;
+        var html = '';
+        var wordBuf = '';
+        function flushWord() {
+            if (wordBuf) {
+                html += '<span class="fa-word">' + wordBuf + '</span>';
+                wordBuf = '';
             }
         }
-        partialDiv.innerHTML = result;
+
+        for (var i = 0; i < text.length; i++) {
+            var ch = text[i].toUpperCase();
+            if (ch >= 'A' && ch <= 'Z') {
+                if (freqMappings[ch]) {
+                    wordBuf += '<span class="fa-letter solved">' + freqMappings[ch].toLowerCase() + '</span>';
+                } else if (placeholderMode) {
+                    wordBuf += '<span class="fa-letter blank" data-cipher="' + ch + '" title="Cipher letter ' + ch + ' — click to assign">_</span>';
+                } else {
+                    wordBuf += '<span class="fa-letter unsolved" data-cipher="' + ch + '" title="Click to assign a plaintext letter">' + ch + '</span>';
+                }
+            } else {
+                flushWord();
+                if (ch === ' ' || ch === '\n' || ch === '\t' || ch === '\r') {
+                    html += ' ';
+                } else {
+                    html += utils.escapeHtml(text[i]);
+                }
+            }
+        }
+        flushWord();
+        partialDiv.innerHTML = html || '<span class="text-muted">No ciphertext analyzed yet.</span>';
     }
 
     function checkFreqProgress() {
@@ -979,47 +1320,38 @@
         }
     }
 
-    // Auto-suggest
+    // Frequency Hint: suggest only the top 3 letters as a starting hypothesis.
+    // This is a learning scaffold, NOT an automatic solver — the student must
+    // verify these guesses against word patterns and context.
     container.querySelector('#mono-freq-auto-suggest').addEventListener('click', function() {
-        var text = utils.cleanText(container.querySelector('#mono-freq-input').value);
+        var text = faCleanText || utils.cleanText(container.querySelector('#mono-freq-input').value);
         if (text.length < 2) {
             utils.showToast('Please analyze some ciphertext first.', 'danger');
             return;
         }
 
-        // Count ciphertext frequencies
         var counts = {};
         for (var i = 0; i < 26; i++) counts[ALPHA[i]] = 0;
         for (var i = 0; i < text.length; i++) {
             if (counts[text[i]] !== undefined) counts[text[i]]++;
         }
-
-        // Sort ciphertext letters by frequency (descending)
-        var cipherSorted = ALPHA.split('').sort(function(a, b) { return counts[b] - counts[a]; });
-        // Standard English frequency order
+        var cipherSorted = ALPHA.split('').filter(function(l) { return counts[l] > 0; })
+            .sort(function(a, b) { return counts[b] - counts[a]; });
         var engOrder = 'ETAOINSHRDLCUMWFGYPBVKJXQZ';
 
-        // Map top letters by frequency
-        freqMappings = {};
-        for (var i = 0; i < 26; i++) {
-            if (counts[cipherSorted[i]] > 0) {
-                freqMappings[cipherSorted[i]] = engOrder[i];
-            }
+        var suggested = [];
+        for (var i = 0; i < Math.min(3, cipherSorted.length); i++) {
+            setMapping(cipherSorted[i], engOrder[i], false);
+            suggested.push(cipherSorted[i] + '→' + engOrder[i]);
         }
+        utils.showToast('Hypothesis: ' + suggested.join(', ') + '. These are guesses — confirm them with word patterns!', 'info');
+    });
 
-        // Update inputs
-        container.querySelectorAll('.mono-freq-map-input').forEach(function(inp) {
-            var cipher = inp.dataset.cipher;
-            inp.value = freqMappings[cipher] || '';
-        });
-
-        if (utils.storage && utils.storage.set) {
-            utils.storage.set('draft_mono_freq', freqMappings);
-        }
-
-        validateFreqMappings();
+    // Toggle placeholder mode (hide unsolved letters as blanks)
+    container.querySelector('#mono-freq-toggle-placeholder').addEventListener('click', function() {
+        placeholderMode = !placeholderMode;
+        this.textContent = placeholderMode ? '👁️ Show Unsolved Letters' : '🙈 Hide Unsolved Letters';
         updatePartialDecrypt();
-        checkFreqProgress();
     });
 
     // Clear mappings
@@ -1035,6 +1367,283 @@
         });
         container.querySelector('#mono-freq-mapping-status').style.display = 'none';
         updatePartialDecrypt();
+        renderWordPatterns();
+    });
+
+    // Click an unsolved letter in the partial text → focus its mapping box
+    container.querySelector('#mono-freq-partial').addEventListener('click', function(e) {
+        var letterEl = e.target.closest('.fa-letter[data-cipher]');
+        if (!letterEl) return;
+        var cipher = letterEl.dataset.cipher;
+        var inp = container.querySelector('.mono-freq-map-input[data-cipher="' + cipher + '"]');
+        if (inp) {
+            inp.focus();
+            inp.select();
+            inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    // Click a word suggestion → apply that whole-word guess
+    container.querySelector('#mono-freq-words').addEventListener('click', function(e) {
+        var chip = e.target.closest('.fa-suggestion[data-plain]');
+        if (!chip) return;
+        applyWordGuess(chip.dataset.cipher, chip.dataset.plain);
+    });
+
+    // ============================
+    // WORD PATTERN RECOGNITION
+    // ============================
+
+    function hasRepeat(word) {
+        var seen = {};
+        for (var i = 0; i < word.length; i++) {
+            if (seen[word[i]]) return true;
+            seen[word[i]] = true;
+        }
+        return false;
+    }
+
+    // Candidate English words matching a cipher word's length + pattern and
+    // consistent with the current one-to-one mappings (both directions).
+    function suggestionsFor(cipherWord) {
+        var key = cipherWord.length + ':' + wordPattern(cipherWord);
+        var candidates = FA_WORD_INDEX[key] || [];
+        var rev = {};
+        for (var c in freqMappings) rev[freqMappings[c]] = c;
+
+        var results = [];
+        for (var w = 0; w < candidates.length; w++) {
+            var word = candidates[w];
+            var ok = true;
+            for (var i = 0; i < cipherWord.length; i++) {
+                var cc = cipherWord[i], pp = word[i];
+                if (freqMappings[cc] && freqMappings[cc] !== pp) { ok = false; break; }
+                if (rev[pp] && rev[pp] !== cc) { ok = false; break; }
+            }
+            if (ok) results.push(word);
+        }
+        return results;
+    }
+
+    // Render the word-pattern panel from the original (spaced) ciphertext.
+    function renderWordPatterns() {
+        var panel = container.querySelector('#mono-freq-words');
+        if (!panel) return;
+        var text = (faOriginalText || '').toUpperCase();
+        if (!text) { panel.innerHTML = ''; return; }
+
+        // Extract unique cipher words (letters only) with their counts
+        var rawWords = text.split(/[^A-Z]+/).filter(function(w) { return w.length > 0; });
+        var wordCounts = {};
+        rawWords.forEach(function(w) { wordCounts[w] = (wordCounts[w] || 0) + 1; });
+        var unique = Object.keys(wordCounts).sort(function(a, b) {
+            return a.length - b.length || (a < b ? -1 : 1);
+        });
+
+        if (unique.length === 0) { panel.innerHTML = ''; return; }
+
+        var html = '';
+        var MAX_CHIPS = 8;
+        for (var u = 0; u < unique.length; u++) {
+            var cw = unique[u];
+            var pat = wordPattern(cw);
+            var suggestions = suggestionsFor(cw);
+
+            // Partial decryption of this word using current mappings
+            var partial = '';
+            for (var i = 0; i < cw.length; i++) {
+                partial += freqMappings[cw[i]] ? freqMappings[cw[i]].toLowerCase() : '·';
+            }
+
+            var isShort = cw.length <= 3;
+            html += '<div class="fa-word-row' + (isShort ? ' short' : '') + '">';
+            html += '<div class="fa-word-cipher">' + cw + '<span class="fa-word-count">×' + wordCounts[cw] + '</span></div>';
+            html += '<div class="fa-word-meta">';
+            html += '<span class="fa-pattern-badge" title="Repeated-letter pattern">' + pat + '</span>';
+            html += '<span class="fa-word-len">' + cw.length + ' letters</span>';
+            if (hasRepeat(cw)) html += '<span class="fa-repeat-badge" title="Has repeated letters">↻ repeat</span>';
+            if (isShort) html += '<span class="fa-short-badge" title="Short words are often THE, AND, ARE…">short word</span>';
+            html += '</div>';
+            html += '<div class="fa-word-partial">' + partial + '</div>';
+            html += '<div class="fa-suggestions">';
+            if (suggestions.length === 0) {
+                html += '<span class="fa-no-match">No dictionary match — try more mappings</span>';
+            } else {
+                var shown = suggestions.slice(0, MAX_CHIPS);
+                for (var s = 0; s < shown.length; s++) {
+                    html += '<button type="button" class="fa-suggestion" data-cipher="' + cw + '" data-plain="' + shown[s] + '" title="Apply ' + cw + ' → ' + shown[s] + '">' + shown[s].toLowerCase() + '</button>';
+                }
+                if (suggestions.length > MAX_CHIPS) {
+                    html += '<span class="fa-more-match">+' + (suggestions.length - MAX_CHIPS) + ' more</span>';
+                }
+            }
+            html += '</div>';
+            html += '</div>';
+        }
+        panel.innerHTML = html;
+    }
+
+    // ============================
+    // PRACTICE MODE / HINTS / CHECK
+    // ============================
+
+    function updateChallengeUI() {
+        var banner = container.querySelector('#mono-freq-challenge-banner');
+        var panel = container.querySelector('#mono-freq-practice-panel');
+        if (currentChallenge) {
+            banner.style.display = 'block';
+            banner.className = 'alert alert-info';
+            banner.innerHTML = '🎓 <strong>Practice Mode:</strong> ' + utils.escapeHtml(currentChallenge.name) +
+                ' — reconstruct the hidden sentence. The answer is not shown; use frequency analysis, word patterns, and hints.';
+            panel.style.display = 'block';
+            container.querySelector('#mono-freq-hint-count').textContent = currentChallenge.hintsUsed;
+        } else {
+            banner.style.display = 'block';
+            banner.className = 'alert alert-warning';
+            banner.innerHTML = '✍️ <strong>Custom ciphertext:</strong> frequency analysis and word suggestions are available, but answer-checking needs a known practice challenge. Load one above to test yourself.';
+            panel.style.display = 'none';
+        }
+    }
+
+    // Decrypt the full clean ciphertext using current mappings (for checking).
+    function currentDecryption() {
+        var out = '';
+        for (var i = 0; i < faCleanText.length; i++) {
+            var ch = faCleanText[i];
+            out += freqMappings[ch] || '?';
+        }
+        return out;
+    }
+
+    // Build progressive hints for the active challenge without revealing it all.
+    function buildHints() {
+        var ch = currentChallenge;
+        var hints = [];
+        var plainClean = utils.cleanText(ch.plain);
+
+        // Hint 1: most frequent cipher letter -> E hypothesis
+        var counts = {};
+        for (var i = 0; i < 26; i++) counts[ALPHA[i]] = 0;
+        for (var i = 0; i < faCleanText.length; i++) counts[faCleanText[i]]++;
+        var sorted = ALPHA.split('').filter(function(l) { return counts[l] > 0; })
+            .sort(function(a, b) { return counts[b] - counts[a]; });
+        if (sorted.length) {
+            hints.push('Start with frequency: the most common ciphertext letter is <strong>' + sorted[0] +
+                '</strong> (' + counts[sorted[0]] + '×). In English the most common letter is <strong>E</strong> — try mapping ' +
+                sorted[0] + ' → E as a hypothesis, then check whether real words appear.');
+        }
+
+        // Hint 2: point at short words
+        var words = (faOriginalText || '').toUpperCase().split(/[^A-Z]+/).filter(function(w) { return w.length > 0; });
+        var shortWords = words.filter(function(w) { return w.length <= 3; });
+        if (shortWords.length) {
+            var uniqueShort = shortWords.filter(function(w, i, a) { return a.indexOf(w) === i; }).slice(0, 4);
+            hints.push('Look at the short words: <strong>' + uniqueShort.join(', ') +
+                '</strong>. Three-letter words are very often <strong>THE, AND, ARE, FOR, YOU, NOT</strong>. ' +
+                'A repeated 3-letter word appearing many times is almost certainly <strong>THE</strong>.');
+        }
+
+        // Hint 3: reveal one correct mapping not yet set (the first plain letter)
+        var revealed = 0;
+        for (var i = 0; i < plainClean.length && revealed < 3; i++) {
+            var plainLetter = plainClean[i];
+            var cipherLetter = ch.key[utils.letterToNum(plainLetter)];
+            if (freqMappings[cipherLetter] !== plainLetter) {
+                hints.push('Here is one correct mapping to anchor your work: <strong>' + cipherLetter +
+                    ' → ' + plainLetter + '</strong>. Enter it, then use the word patterns to spread out from there.');
+                revealed++;
+            }
+        }
+
+        // Hint 4: common bigram guidance
+        hints.push('If you are stuck, find the most common two-letter pair (bigram) in the ciphertext. ' +
+            'It usually stands for <strong>TH, HE, IN, ER</strong> or <strong>AN</strong>. Combined with a known letter, that often unlocks a whole word.');
+
+        return hints;
+    }
+
+    container.querySelector('#mono-freq-hint-btn').addEventListener('click', function() {
+        if (!currentChallenge) return;
+        var hints = buildHints();
+        var idx = Math.min(currentChallenge.hintsUsed, hints.length - 1);
+        var hintDiv = container.querySelector('#mono-freq-hint-text');
+        // Accumulate hints so earlier ones stay visible
+        var shownHtml = '';
+        for (var i = 0; i <= idx; i++) {
+            shownHtml += '<div style="margin-bottom:0.5rem"><strong>Hint ' + (i + 1) + ':</strong> ' + hints[i] + '</div>';
+        }
+        hintDiv.innerHTML = shownHtml;
+        hintDiv.classList.add('show');
+        currentChallenge.hintsUsed = Math.min(currentChallenge.hintsUsed + 1, hints.length);
+        container.querySelector('#mono-freq-hint-count').textContent = currentChallenge.hintsUsed;
+        if (currentChallenge.hintsUsed >= hints.length) {
+            utils.showToast('All hints revealed. Try to finish the reconstruction yourself!', 'info');
+        }
+    });
+
+    container.querySelector('#mono-freq-check-answer').addEventListener('click', function() {
+        if (!currentChallenge) return;
+        var feedback = container.querySelector('#mono-freq-answer-feedback');
+        var target = utils.cleanText(currentChallenge.plain);
+        var attempt = currentDecryption();
+
+        var correct = 0;
+        var mappedCount = Object.keys(freqMappings).length;
+        for (var i = 0; i < target.length; i++) {
+            if (attempt[i] === target[i]) correct++;
+        }
+        var pct = Math.round(correct / target.length * 100);
+        feedback.classList.add('show');
+
+        if (attempt === target) {
+            feedback.className = 'exercise-feedback show correct-feedback';
+            feedback.innerHTML = '🎉 <strong>Perfect!</strong> You reconstructed the entire message correctly:<br>' +
+                '<span class="highlight-plain">' + utils.escapeHtml(currentChallenge.plain) + '</span><br>' +
+                'Hints used: ' + currentChallenge.hintsUsed + '. Outstanding cryptanalysis!';
+            currentChallenge.solved = true;
+            progress.complete(SECTION, 'mono-frequency');
+            utils.showToast('Challenge solved! 🎉', 'success');
+        } else {
+            feedback.className = 'exercise-feedback show incorrect-feedback';
+            var msg = 'You have <strong>' + correct + ' / ' + target.length + '</strong> letters correct (' + pct + '%). ';
+            if (mappedCount === 0) {
+                msg += 'Start by assigning a few mappings — try the Frequency Hint or a short-word guess.';
+            } else if (pct >= 60) {
+                msg += 'You are close! Look at the partially decrypted sentence for words that are almost right and fix one letter at a time.';
+            } else {
+                msg += 'Keep going — use the word pattern suggestions and check for mapping conflicts.';
+            }
+            feedback.innerHTML = msg;
+        }
+        utils.animateElement(feedback, 'fade-in');
+    });
+
+    container.querySelector('#mono-freq-reveal').addEventListener('click', function() {
+        if (!currentChallenge) return;
+        if (!confirm('Reveal the full solution? This fills in every mapping and ends the challenge. Try a hint first if you want to keep solving!')) {
+            return;
+        }
+        var ch = currentChallenge;
+        // Fill all mappings from the key (cipher letter -> plain letter)
+        freqMappings = {};
+        var plainClean = utils.cleanText(ch.plain);
+        for (var i = 0; i < plainClean.length; i++) {
+            var p = plainClean[i];
+            var c = ch.key[utils.letterToNum(p)];
+            freqMappings[c] = p;
+        }
+        container.querySelectorAll('.mono-freq-map-input').forEach(function(inp) {
+            inp.value = freqMappings[inp.dataset.cipher] || '';
+        });
+        if (utils.storage && utils.storage.set) utils.storage.set('draft_mono_freq', freqMappings);
+        validateFreqMappings();
+        updatePartialDecrypt();
+        renderWordPatterns();
+        var feedback = container.querySelector('#mono-freq-answer-feedback');
+        feedback.className = 'exercise-feedback show correct-feedback';
+        feedback.innerHTML = '🏳️ Solution revealed:<br><span class="highlight-plain">' + utils.escapeHtml(ch.plain) +
+            '</span><br>Load a new random challenge to practice again from scratch.';
+        utils.showToast('Solution revealed. Load a new challenge to keep practicing!', 'info');
     });
 
     // ---- EXERCISES ----
@@ -1210,8 +1819,9 @@
         if (freqInput) freqInput.value = savedCiphertext;
         var cleanedSaved = utils.cleanText(savedCiphertext);
         if (cleanedSaved.length >= 2) {
-            performFrequencyAnalysis(cleanedSaved);
+            performFrequencyAnalysis(savedCiphertext);
             container.querySelector('#mono-freq-results').style.display = 'block';
+            updateChallengeUI();
         }
     }
 
