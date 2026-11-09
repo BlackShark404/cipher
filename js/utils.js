@@ -176,24 +176,6 @@ var CipherApp = window.CipherApp;
             return 'none';
         },
 
-        // Get specific color based on progress percentage
-        getProgressColor: function(pct) {
-            if (pct >= 100) return 'var(--success)';
-            if (pct >= 70) return 'var(--info)';
-            if (pct >= 35) return 'var(--primary)';
-            if (pct > 0) return 'var(--warning)';
-            return 'var(--border-strong)';
-        },
-
-        // Get matching subtle glow for progress
-        getProgressGlow: function(pct) {
-            if (pct >= 100) return 'var(--success-glow)';
-            if (pct >= 70) return 'rgba(14, 165, 233, 0.35)';
-            if (pct >= 35) return 'var(--primary-glow)';
-            if (pct > 0) return 'var(--warning-glow)';
-            return 'none';
-        },
-
         // Create an element with attributes and children
         createElement: function (tag, attrs, children) {
             var el = document.createElement(tag);

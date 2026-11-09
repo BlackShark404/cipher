@@ -390,9 +390,9 @@
 
     // Exercise 2: Decrypt with Key
     html += buildExerciseHtml(2, 'easy', 'Decrypt with Key',
-        'Using the same cipher alphabet <span class="highlight-key">QWERTYUIOPASDFGHJKLZXCVBNM</span>, decrypt the ciphertext <span class="highlight-cipher">JXHER</span>.',
+        'Using the same cipher alphabet <span class="highlight-key">QWERTYUIOPASDFGHJKLZXCVBNM</span>, decrypt the ciphertext <span class="highlight-cipher">JXOM</span>.',
         'Type the plaintext',
-        'Find each ciphertext letter in the cipher alphabet, then look at which position it\'s in. J is at position 16 (P), X is at position 21 (U), H is at position 8 (H)... wait, let me recalculate: J→P (J is position 10 in key → plain O)... Actually: find J in QWERTYUIOPASDFGHJKLZXCVBNM — it\'s at index 9 → plain letter is J? No — find where J appears: Q(0)W(1)E(2)R(3)T(4)Y(5)U(6)I(7)O(8)P(9) — P is at index 9. J is at index... A(10)S(11)D(12)F(13)G(14)H(15)J(16) — so J is at index 16, which maps to plain Q. Hmm, let\'s use the reverse lookup properly.',
+        'Find each ciphertext letter in the cipher alphabet and note its position (1-indexed). J is at position 17 → plain Q. X is at position 21 → plain U. O is at position 9 → plain I. M is at position 26 → plain Z.',
         'mono-exercise-2');
 
     // Exercise 3: Missing Mapping
@@ -1051,17 +1051,16 @@
             'HELLO → <span class="highlight-cipher">' + ex1Answer + '</span>';
     });
 
-    // Exercise 2: Decrypt JXHER with QWERTYUIOPASDFGHJKLZXCVBNM
-    var ex2Answer = monoDecrypt('JXHER', EXAMPLE_KEY);
+    // Exercise 2: Decrypt JXOM with QWERTYUIOPASDFGHJKLZXCVBNM
+    var ex2Answer = monoDecrypt('JXOM', EXAMPLE_KEY);
     setupExercise(2, ex2Answer, function() {
         return 'Correct! 🎉 Reverse lookup: ' +
             'Find each ciphertext letter in the key and note its position:<br>' +
             '<strong>J</strong> is at index 16 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('J')] + '</strong>, ' +
             '<strong>X</strong> is at index 20 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('X')] + '</strong>, ' +
-            '<strong>H</strong> is at index 15 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('H')] + '</strong>, ' +
-            '<strong>E</strong> is at index 2 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('E')] + '</strong>, ' +
-            '<strong>R</strong> is at index 3 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('R')] + '</strong>. ' +
-            'JXHER → <span class="highlight-plain">' + ex2Answer + '</span>';
+            '<strong>O</strong> is at index 8 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('O')] + '</strong>, ' +
+            '<strong>M</strong> is at index 25 → plain <strong>' + ALPHA[EXAMPLE_KEY.indexOf('M')] + '</strong>. ' +
+            'JXOM → <span class="highlight-plain">' + ex2Answer + '</span>';
     });
 
     // Exercise 3: Missing letters: positions B(1) and E(4) → W and T

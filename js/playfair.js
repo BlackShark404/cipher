@@ -397,7 +397,7 @@
     html += '<input type="text" id="pf-dec-keyword" value="MONARCHY" placeholder="Keyword...">';
     html += '</div><div class="input-group">';
     html += '<label for="pf-dec-ciphertext">Ciphertext</label>';
-    html += '<input type="text" id="pf-dec-ciphertext" value="GATLMZCLRQTX" placeholder="Ciphertext...">';
+    html += '<input type="text" id="pf-dec-ciphertext" value="GATLMZCLRQXA" placeholder="Ciphertext...">';
     html += '</div></div>';
     html += '<button class="btn btn-primary" id="btn-decrypt">🔓 Decrypt</button>';
 

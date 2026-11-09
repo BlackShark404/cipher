@@ -1133,7 +1133,9 @@
             });
 
             // Submit
+            var submitted = false;
             container.querySelector('#btn-exam-submit').addEventListener('click', function() {
+                if (submitted) { advanceNext(); return; }
                 var answer = '';
                 if (q.type === 'choice') {
                     var selected = container.querySelector('input[name="exam-choice"]:checked');
@@ -1163,6 +1165,7 @@
 
                 var points = isCorrect ? (hintRequested ? 0.9 : 1.0) : 0;
                 recordAnswer(answer, isCorrect, points, q.explanation);
+                submitted = true;
 
                 // Show instant solution and change button to "Next Question"
                 var fb = container.querySelector('#exam-feedback-box');
@@ -1179,9 +1182,6 @@
                 var submitBtn = container.querySelector('#btn-exam-submit');
                 submitBtn.textContent = (examState.currentIndex + 1 < examState.questions.length) ? 'Next Question ➜' : 'View Exam Results 🏁';
                 submitBtn.className = 'btn btn-success';
-                submitBtn.onclick = function() {
-                    advanceNext();
-                };
 
                 // Disable inputs
                 container.querySelectorAll('input').forEach(i => i.disabled = true);
@@ -1876,6 +1876,7 @@
                 var d1 = utils.mod(ans2 + 1, 26);
                 var d2 = utils.mod(ans2 - 1, 26);
                 var d3 = utils.mod(c + k, 26);
+                if (d3 === ans2) d3 = utils.mod(ans2 + 2, 26);
                 q = {
                     category: 'Modular Subtraction',
                     prompt: `(${c} − ${k} + 26) mod 26 = ?`,
