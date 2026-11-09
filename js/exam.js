@@ -1020,7 +1020,7 @@
 
                 if (examState.timeRemaining <= 0) {
                     clearInterval(examState.timerInterval);
-                    alert("⏰ Time is up! Submitting your exam automatically...");
+                    utils.showToast('Time is up! Submitting your exam automatically...', 'danger');
                     finishExam();
                 }
             }, 1000);
@@ -1035,7 +1035,7 @@
             var timerDisplayHtml = (examState.totalSeconds > 0) ? `
                 <div style="text-align: right;">
                     <div style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; font-weight: 700;">Time Remaining</div>
-                    <div id="exam-live-timer" class="timer-display" style="font-size: 1.5rem; padding: 0;">--:--</div>
+                    <div id="exam-live-timer" class="timer-display" style="font-size: 1.5rem; padding: 0;">${String(Math.floor(examState.timeRemaining / 60)).padStart(2, '0')}:${String(examState.timeRemaining % 60).padStart(2, '0')}</div>
                 </div>` : `
                 <div style="text-align: right;">
                     <span class="badge badge-success">Untimed Mode</span>
@@ -1140,14 +1140,14 @@
                 if (q.type === 'choice') {
                     var selected = container.querySelector('input[name="exam-choice"]:checked');
                     if (!selected) {
-                        alert("Please select an answer before submitting.");
+                        utils.showToast('Please select an answer before submitting.', 'danger');
                         return;
                     }
                     answer = selected.value;
                 } else {
                     answer = container.querySelector('#exam-text-answer').value.trim();
                     if (!answer) {
-                        alert("Please enter your answer before submitting.");
+                        utils.showToast('Please enter your answer before submitting.', 'danger');
                         return;
                     }
                 }
@@ -1188,6 +1188,14 @@
                 container.querySelector('#btn-exam-skip').disabled = true;
                 container.querySelector('#btn-exam-hint').disabled = true;
             });
+
+            // Enter key submits the answer
+            var textInput = container.querySelector('#exam-text-answer');
+            if (textInput) {
+                textInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') container.querySelector('#btn-exam-submit').click();
+                });
+            }
         }
 
         function recordAnswer(answer, isCorrect, points, explanation) {
@@ -1371,7 +1379,7 @@
                 });
 
                 if (missed.length === 0) {
-                    alert("Awesome! You answered every question correctly. Starting a fresh exam instead.");
+                    utils.showToast('All correct! Starting a fresh exam instead.', 'success');
                     renderExamConfig();
                     return;
                 }
@@ -1958,7 +1966,7 @@
 
             if (optEl) {
                 optEl.innerHTML = '';
-                drillState.currentQuestion.options.forEach(function(opt) {
+                drillState.currentQuestion.options.forEach(function(opt, i) {
                     var btn = document.createElement('button');
                     btn.className = 'btn btn-secondary';
                     btn.style.minWidth = '80px';
@@ -1966,7 +1974,7 @@
                     btn.style.fontFamily = 'var(--font-mono)';
                     btn.style.fontWeight = '700';
                     btn.style.padding = '0.65rem 1.25rem';
-                    btn.textContent = opt;
+                    btn.innerHTML = '<span style="display:inline-block;min-width:1.4em;font-size:0.7rem;opacity:0.55;border:1px solid currentColor;border-radius:4px;padding:0 0.3em;margin-right:0.5em;vertical-align:middle;">' + (i + 1) + '</span>' + opt;
 
                     btn.addEventListener('click', function() {
                         handleSpeedAnswer(opt, btn);
@@ -2111,6 +2119,16 @@
 
         var btnQuit = container.querySelector('#btn-quit-speed-drill');
         if (btnQuit) btnQuit.addEventListener('click', endSpeedDrill);
+
+        // Keyboard shortcuts: 1-4 select speed drill options
+        document.addEventListener('keydown', function(e) {
+            if (!drillState.active) return;
+            var idx = parseInt(e.key, 10) - 1;
+            if (idx >= 0 && idx <= 3) {
+                var btns = container.querySelectorAll('#speed-drill-options button');
+                if (btns[idx]) btns[idx].click();
+            }
+        });
     });
 
 })(window.CipherApp);

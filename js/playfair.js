@@ -511,10 +511,10 @@
     // ---- B. MATRIX GENERATOR ----
     function generateMatrixUI() {
         var keyword = container.querySelector('#pf-matrix-keyword').value.trim();
-        if (!keyword) { alert('Please enter a keyword.'); return; }
+        if (!keyword) { utils.showToast('Please enter a keyword.', 'danger'); return; }
 
         var kw = utils.cleanText(keyword).replace(/J/g, 'I');
-        if (kw.length === 0) { alert('Keyword must contain at least one letter.'); return; }
+        if (kw.length === 0) { utils.showToast('Keyword must contain at least one letter.', 'danger'); return; }
 
         // Dedup keyword
         var seen = {};
@@ -586,7 +586,7 @@
     // ---- C. PLAINTEXT PREPARATION ----
     function prepareTextUI() {
         var input = container.querySelector('#pf-prep-input').value.trim();
-        if (!input) { alert('Please enter a plaintext message.'); return; }
+        if (!input) { utils.showToast('Please enter a plaintext message.', 'danger'); return; }
 
         var original = input;
         var upper = input.toUpperCase().replace(/[^A-Z]/g, '');
@@ -653,12 +653,12 @@
     function encryptUI() {
         var keyword = container.querySelector('#pf-enc-keyword').value.trim();
         var plaintext = container.querySelector('#pf-enc-plaintext').value.trim();
-        if (!keyword || !plaintext) { alert('Please enter both a keyword and plaintext.'); return; }
+        if (!keyword || !plaintext) { utils.showToast('Please enter both a keyword and plaintext.', 'danger'); return; }
 
         var matrixData = buildMatrix(keyword);
         var prepared = prepareText(plaintext);
 
-        if (prepared.digraphs.length === 0) { alert('No valid text to encrypt.'); return; }
+        if (prepared.digraphs.length === 0) { utils.showToast('No valid text to encrypt.', 'danger'); return; }
 
         var results = [];
         prepared.digraphs.forEach(function(d) {
@@ -752,11 +752,11 @@
     function decryptUI() {
         var keyword = container.querySelector('#pf-dec-keyword').value.trim();
         var ciphertext = container.querySelector('#pf-dec-ciphertext').value.trim();
-        if (!keyword || !ciphertext) { alert('Please enter both a keyword and ciphertext.'); return; }
+        if (!keyword || !ciphertext) { utils.showToast('Please enter both a keyword and ciphertext.', 'danger'); return; }
 
         var matrixData = buildMatrix(keyword);
         var clean = utils.cleanText(ciphertext).replace(/J/g, 'I');
-        if (clean.length === 0) { alert('Ciphertext must contain letters.'); return; }
+        if (clean.length === 0) { utils.showToast('Ciphertext must contain letters.', 'danger'); return; }
         if (clean.length % 2 !== 0) {
             clean += 'X'; // pad if odd
         }

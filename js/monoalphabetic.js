@@ -738,7 +738,7 @@
         var text = container.querySelector('#mono-freq-input').value;
         var cleaned = utils.cleanText(text);
         if (cleaned.length < 2) {
-            alert('Please enter some ciphertext to analyze (at least 2 letters).');
+            utils.showToast('Please enter some ciphertext to analyze (at least 2 letters).', 'danger');
             return;
         }
         if (utils.storage && utils.storage.set) {
@@ -983,7 +983,7 @@
     container.querySelector('#mono-freq-auto-suggest').addEventListener('click', function() {
         var text = utils.cleanText(container.querySelector('#mono-freq-input').value);
         if (text.length < 2) {
-            alert('Please analyze some ciphertext first.');
+            utils.showToast('Please analyze some ciphertext first.', 'danger');
             return;
         }
 
