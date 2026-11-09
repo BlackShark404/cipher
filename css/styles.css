@@ -2273,6 +2273,14 @@ table.styled-table td.mono {
 .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 
+/* Monoalphabetic mobile encrypt/decrypt direction toggle */
+.mono-dir-toggle { display: none; }
+@media (max-width: 768px) {
+    .mono-dir-toggle { display: flex; margin-bottom: 0.25rem; }
+    .mono-dir-grid.show-enc #mono-dec-card { display: none; }
+    .mono-dir-grid.show-dec #mono-enc-card { display: none; }
+}
+
 .text-center { text-align: center; }
 .text-muted { color: var(--text-muted); }
 .text-sm { font-size: 0.85rem; }

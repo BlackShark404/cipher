@@ -66,6 +66,24 @@ var CipherApp = window.CipherApp;
             });
         },
 
+        // True when the viewport is phone/tablet sized (matches CSS mobile breakpoint)
+        isMobileViewport: function () {
+            return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+        },
+
+        // Scroll an element into view only on mobile, so results appear without manual scrolling
+        revealOnMobile: function (el) {
+            if (app.utils.isMobileViewport() && el && el.scrollIntoView) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        },
+
+        // Initial open/closed class for a "working/steps" collapsible:
+        // expanded on desktop (preserves existing behavior), collapsed on mobile to save scrolling
+        workingOpenClass: function () {
+            return app.utils.isMobileViewport() ? '' : ' open';
+        },
+
         // Get the full alphabet as an array
         alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
 

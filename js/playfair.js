@@ -716,19 +716,27 @@
         });
         rhtml += '</div></div>';
 
-        // Final result
-        rhtml += '<div class="result-box success">';
-        rhtml += '<div class="result-label">Ciphertext</div>';
-        rhtml += '<span class="highlight-cipher" style="font-size:1.3rem;letter-spacing:2px;">' + ciphertext + '</span>';
-        rhtml += '</div>';
+        // Final result FIRST so it is visible without scrolling on mobile
+        var resultHtml = '';
+        resultHtml += '<div class="result-box success">';
+        resultHtml += '<div class="result-label">Ciphertext</div>';
+        resultHtml += '<span class="highlight-cipher" style="font-size:1.3rem;letter-spacing:2px;">' + ciphertext + '</span>';
+        resultHtml += '</div>';
 
-        rhtml += '<div class="result-box info">';
-        rhtml += '<div class="result-label">Encrypted Digraphs</div>';
+        resultHtml += '<div class="result-box info">';
+        resultHtml += '<div class="result-label">Encrypted Digraphs</div>';
         var encDigraphs = results.map(function(r) { return r.output; });
-        rhtml += renderDigraphs(encDigraphs);
-        rhtml += '</div>';
+        resultHtml += renderDigraphs(encDigraphs);
+        resultHtml += '</div>';
+
+        // Matrix + prepared digraphs + steps become collapsible working (collapsed on mobile)
+        rhtml = resultHtml +
+            '<div class="collapsible' + utils.workingOpenClass() + '">' +
+            '<div class="collapsible-header">🔍 Show key matrix & step-by-step working</div>' +
+            '<div class="collapsible-body">' + rhtml + '</div></div>';
 
         container.querySelector('#pf-enc-result').innerHTML = rhtml;
+        utils.revealOnMobile(container.querySelector('#pf-enc-result .result-box'));
 
         // Animate steps sequentially
         var steps = container.querySelectorAll('#pf-enc-steps .step-item');
@@ -822,15 +830,23 @@
         });
         rhtml += '</div></div>';
 
-        // Final result
-        rhtml += '<div class="result-box success">';
-        rhtml += '<div class="result-label">Decrypted Plaintext (raw)</div>';
-        rhtml += '<span class="highlight-plain" style="font-size:1.3rem;letter-spacing:2px;">' + plaintext + '</span>';
-        rhtml += '</div>';
+        // Final result FIRST so it is visible without scrolling on mobile
+        var resultHtml = '';
+        resultHtml += '<div class="result-box success">';
+        resultHtml += '<div class="result-label">Decrypted Plaintext (raw)</div>';
+        resultHtml += '<span class="highlight-plain" style="font-size:1.3rem;letter-spacing:2px;">' + plaintext + '</span>';
+        resultHtml += '</div>';
 
-        rhtml += '<div class="alert alert-warning">⚠️ The decrypted text may contain filler X characters that were inserted during encryption. For example, "<code>BALXLOON</code>" should be read as "<code>BALLOON</code>". Use context to remove filler X\'s.</div>';
+        resultHtml += '<div class="alert alert-warning">⚠️ The decrypted text may contain filler X characters that were inserted during encryption. For example, "<code>BALXLOON</code>" should be read as "<code>BALLOON</code>". Use context to remove filler X\'s.</div>';
+
+        // Matrix + ciphertext digraphs + steps become collapsible working (collapsed on mobile)
+        rhtml = resultHtml +
+            '<div class="collapsible' + utils.workingOpenClass() + '">' +
+            '<div class="collapsible-header">🔍 Show key matrix & step-by-step working</div>' +
+            '<div class="collapsible-body">' + rhtml + '</div></div>';
 
         container.querySelector('#pf-dec-result').innerHTML = rhtml;
+        utils.revealOnMobile(container.querySelector('#pf-dec-result .result-box'));
 
         // Animate steps
         var steps = container.querySelectorAll('#pf-dec-steps .step-item');

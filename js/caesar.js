@@ -913,8 +913,11 @@
             }
         }
         transformHTML += '</div>';
-        encTransformDisplay.innerHTML = transformHTML;
-        utils.animateElement(encTransformDisplay, 'fade-in');
+        encTransformDisplay.innerHTML =
+            '<div class="collapsible' + utils.workingOpenClass() + '">' +
+            '<div class="collapsible-header">🔍 Show letter-by-letter working</div>' +
+            '<div class="collapsible-body">' + transformHTML + '</div></div>';
+        utils.revealOnMobile(encResultBox);
 
         progress.complete('caesar', 'caesar-encrypt-decrypt');
     }

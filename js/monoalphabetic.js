@@ -446,10 +446,14 @@
     html += '</div></div>'; // end card
 
     // Encrypt / Decrypt area
-    html += '<div class="grid-2col" style="margin-top:1.5rem">';
+    html += '<div class="mono-dir-toggle btn-group" role="tablist" aria-label="Cipher direction">';
+    html += '<button class="btn btn-primary btn-sm mono-dir-btn active" data-dir="enc">🔒 Encrypt</button>';
+    html += '<button class="btn btn-secondary btn-sm mono-dir-btn" data-dir="dec">🔓 Decrypt</button>';
+    html += '</div>';
+    html += '<div class="grid-2col mono-dir-grid show-enc" style="margin-top:1.5rem">';
 
     // Encrypt
-    html += '<div class="card"><div class="card-header" style="background:var(--plain-color)"><h3>🔒 Encrypt</h3></div>';
+    html += '<div class="card" id="mono-enc-card"><div class="card-header" style="background:var(--plain-color)"><h3>🔒 Encrypt</h3></div>';
     html += '<div class="card-body">';
     html += '<div class="input-group"><label>Plaintext</label><textarea id="mono-enc-input" placeholder="Enter plaintext to encrypt...">HELLO WORLD</textarea></div>';
     html += '<button class="btn btn-primary" id="mono-enc-btn">Encrypt →</button>';
@@ -458,7 +462,7 @@
     html += '</div></div>';
 
     // Decrypt
-    html += '<div class="card"><div class="card-header" style="background:var(--cipher-color)"><h3>🔓 Decrypt</h3></div>';
+    html += '<div class="card" id="mono-dec-card"><div class="card-header" style="background:var(--cipher-color)"><h3>🔓 Decrypt</h3></div>';
     html += '<div class="card-body">';
     html += '<div class="input-group"><label>Ciphertext</label><textarea id="mono-dec-input" placeholder="Enter ciphertext to decrypt..."></textarea></div>';
     html += '<button class="btn btn-danger" id="mono-dec-btn">← Decrypt</button>';
@@ -714,6 +718,24 @@
         });
     });
 
+    // ---- Mobile Encrypt/Decrypt direction toggle ----
+    container.querySelectorAll('.mono-dir-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var dir = this.dataset.dir;
+            container.querySelectorAll('.mono-dir-btn').forEach(function(b) {
+                var isActive = (b === btn);
+                b.classList.toggle('active', isActive);
+                b.classList.toggle('btn-primary', isActive);
+                b.classList.toggle('btn-secondary', !isActive);
+            });
+            var grid = container.querySelector('.mono-dir-grid');
+            if (grid) {
+                grid.classList.toggle('show-enc', dir === 'enc');
+                grid.classList.toggle('show-dec', dir === 'dec');
+            }
+        });
+    });
+
     // ---- FUNDAMENTALS ----
     container.querySelector('#mono-fund-done-btn').addEventListener('click', function() {
         progress.complete(SECTION, 'mono-fundamentals');
@@ -906,7 +928,11 @@
             stepHtml += '</div>';
         }
         stepHtml += '</div>';
-        stepsDiv.innerHTML = stepHtml;
+        stepsDiv.innerHTML =
+            '<div class="collapsible' + utils.workingOpenClass() + '">' +
+            '<div class="collapsible-header">🔍 Show letter-by-letter working</div>' +
+            '<div class="collapsible-body">' + stepHtml + '</div></div>';
+        utils.revealOnMobile(resDiv);
 
         progress.complete(SECTION, 'mono-encrypt-decrypt');
         utils.animateElement(resDiv, 'fade-in');
@@ -951,7 +977,11 @@
             stepHtml += '</div>';
         }
         stepHtml += '</div>';
-        stepsDiv.innerHTML = stepHtml;
+        stepsDiv.innerHTML =
+            '<div class="collapsible' + utils.workingOpenClass() + '">' +
+            '<div class="collapsible-header">🔍 Show letter-by-letter working</div>' +
+            '<div class="collapsible-body">' + stepHtml + '</div></div>';
+        utils.revealOnMobile(resDiv);
 
         progress.complete(SECTION, 'mono-encrypt-decrypt');
         utils.animateElement(resDiv, 'fade-in');
