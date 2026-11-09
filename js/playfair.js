@@ -351,7 +351,7 @@
     // =============================================================
     // D. INTERACTIVE PLAYFAIR ENCRYPTION
     // =============================================================
-    html += '<div class="card"><div class="card-header" style="background: var(--cipher-color);"><h3>D. Interactive Playfair Encryption</h3></div><div class="card-body">';
+    html += '<div class="card" id="playfair-encrypt-card"><div class="card-header" style="background: var(--cipher-color);"><h3>D. Interactive Playfair Encryption</h3></div><div class="card-body">';
 
     html += '<p>Enter a keyword and plaintext to encrypt using the Playfair cipher. Each digraph pair is encrypted individually using one of three rules.</p>';
 

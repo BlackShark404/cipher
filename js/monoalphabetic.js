@@ -446,6 +446,7 @@
     html += '</div></div>'; // end card
 
     // Encrypt / Decrypt area
+    html += '<div id="mono-workbench">';
     html += '<div class="mono-dir-toggle btn-group" role="tablist" aria-label="Cipher direction">';
     html += '<button class="btn btn-primary btn-sm mono-dir-btn active" data-dir="enc">🔒 Encrypt</button>';
     html += '<button class="btn btn-secondary btn-sm mono-dir-btn" data-dir="dec">🔓 Decrypt</button>';
@@ -471,6 +472,7 @@
     html += '</div></div>';
 
     html += '</div>'; // end grid
+    html += '</div>'; // end mono-workbench
 
     html += '</div>'; // end tab-alpha
 

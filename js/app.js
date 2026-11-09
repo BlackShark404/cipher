@@ -17,6 +17,13 @@
         review: 'Cheat Sheets, Cribs & Fast Reference'
     };
 
+    // Floating jump button targets per cipher section
+    var workbenchTargets = {
+        caesar: { anchor: 'caesar-encrypt-card' },
+        monoalphabetic: { tab: 'mono-tab-alpha', anchor: 'mono-workbench' },
+        playfair: { anchor: 'playfair-encrypt-card' }
+    };
+
     function navigateTo(sectionId, skipHash) {
         if (!sectionTitles[sectionId]) sectionId = 'home';
 
@@ -31,6 +38,10 @@
         });
 
         currentSection = sectionId;
+
+        // Show floating jump button only on cipher workbench sections
+        var fab = document.getElementById('workbench-fab');
+        if (fab) fab.classList.toggle('visible', !!workbenchTargets[sectionId]);
 
         // Persist active section
         if (app.storage) {
@@ -326,6 +337,24 @@
                 if (collapsible) collapsible.classList.toggle('open');
             }
         });
+
+        // Floating jump-to-workbench button
+        var workbenchFab = document.getElementById('workbench-fab');
+        if (workbenchFab) {
+            workbenchFab.addEventListener('click', function() {
+                var cfg = workbenchTargets[currentSection];
+                if (!cfg) return;
+                if (cfg.tab) {
+                    var tabBtn = document.querySelector('.tab-btn[data-tab="' + cfg.tab + '"]');
+                    if (tabBtn) tabBtn.click();
+                }
+                // Wait a frame so a freshly activated tab is laid out before scrolling
+                requestAnimationFrame(function() {
+                    var anchor = document.getElementById(cfg.anchor);
+                    if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+        }
 
         // Copy functionality on double-click or click of result boxes
         document.addEventListener('click', function(e) {

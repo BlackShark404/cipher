@@ -2281,6 +2281,45 @@ table.styled-table td.mono {
     .mono-dir-grid.show-dec #mono-enc-card { display: none; }
 }
 
+/* Floating jump-to-workbench button */
+.workbench-fab {
+    display: none;
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 940;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.15rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 6px 18px var(--primary-glow);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+.workbench-fab.visible { display: inline-flex; }
+.workbench-fab:hover { box-shadow: 0 8px 22px var(--primary-glow); }
+.workbench-fab:active { transform: scale(0.96); }
+.workbench-fab-icon { font-size: 1.05rem; }
+
+#caesar-encrypt-card, #mono-workbench, #playfair-encrypt-card {
+    scroll-margin-top: 90px;
+}
+
+@media (max-width: 768px) {
+    .workbench-fab {
+        right: 1rem;
+        bottom: 1rem;
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
 .text-center { text-align: center; }
 .text-muted { color: var(--text-muted); }
 .text-sm { font-size: 0.85rem; }
